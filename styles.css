@@ -46,3 +46,7 @@ body {
     color: red;
     font-weight: bold;
 }
+
+#difficulty-container {
+    margin-top: 20px;
+}
