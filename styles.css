@@ -51,6 +51,11 @@ body {
     margin-top: 20px;
 }
 
+#hint {
+    color: #888;
+    margin-top: 10px;
+}
+
 #progress-bar {
     width: 100%;
     background-color: #ddd;

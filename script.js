@@ -22,12 +22,15 @@ const reviewContainer = document.getElementById('review-container');
 const answerReviewList = document.getElementById('answer-review-list');
 const leaderboardContainer = document.getElementById('leaderboard-container');
 const leaderboardList = document.getElementById('leaderboard-list');
+const hintButton = document.getElementById('hint-button');
+const hintElement = document.getElementById('hint');
 
 const questions = {
     easy: [
         {
             category: 'Geography',
             question: 'What is the capital of France?',
+            hint: 'It is also known as the City of Lights.',
             answers: [
                 { text: 'Berlin', correct: false },
                 { text: 'Madrid', correct: false },
@@ -38,6 +41,7 @@ const questions = {
         {
             category: 'Literature',
             question: 'Is "To Kill a Mockingbird" written by Harper Lee?',
+            hint: 'The author is known for this classic novel.',
             answers: [
                 { text: 'True', correct: true },
                 { text: 'False', correct: false }
@@ -48,6 +52,7 @@ const questions = {
         {
             category: 'Science',
             question: 'What is the chemical symbol for Gold?',
+            hint: 'It starts with "A" and ends with "u".',
             answers: [
                 { text: 'Au', correct: true },
                 { text: 'Ag', correct: false },
@@ -58,6 +63,7 @@ const questions = {
         {
             category: 'History',
             question: 'Who was the first President of the United States?',
+            hint: 'He is also known for the Cherry Tree story.',
             answers: [
                 { text: 'George Washington', correct: true },
                 { text: 'Thomas Jefferson', correct: false },
@@ -70,6 +76,7 @@ const questions = {
         {
             category: 'Mathematics',
             question: 'What is the integral of e^x?',
+            hint: 'The result is the same as the original function plus a constant.',
             answers: [
                 { text: 'e^x + C', correct: true },
                 { text: 'e^x', correct: false },
@@ -80,6 +87,7 @@ const questions = {
         {
             category: 'Technology',
             question: 'Who is known as the father of the computer?',
+            hint: 'He designed the first mechanical computer.',
             answers: [
                 { text: 'Charles Babbage', correct: true },
                 { text: 'Alan Turing', correct: false },
@@ -98,6 +106,7 @@ let highScore = localStorage.getItem('highScore') || 0;
 let username = 'Guest';
 let answerHistory = [];
 let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+let currentDifficulty = 'easy';
 
 function startGame() {
     username = usernameInput.value || 'Guest';
@@ -108,8 +117,8 @@ function startGame() {
     scoreElement.innerText = score;
     highScoreElement.innerText = highScore;
 
-    const difficulty = difficultySelect.value;
-    const questionsArray = shuffleArray(questions[difficulty]);
+    currentDifficulty = difficultySelect.value;
+    const questionsArray = shuffleArray(questions[currentDifficulty]);
     totalQuestionsElement.innerText = questionsArray.length;
 
     nextButton.classList.add('hide');
@@ -119,6 +128,7 @@ function startGame() {
     leaderboardContainer.classList.add('hide');
     profileContainer.classList.add('hide');
     questionContainer.classList.remove('hide');
+    hintElement.classList.add('hide');
 
     answerHistory = [];
     showQuestion(questionsArray[currentQuestionIndex]);
@@ -127,6 +137,7 @@ function startGame() {
 function showQuestion(question) {
     categoryElement.innerText = `Category: ${question.category}`;
     questionContainer.querySelector('#question').innerText = question.question;
+    hintElement.innerText = question.hint;
     answerButtons.innerHTML = '';
     question.answers.forEach(answer => {
         const button = document.createElement('button');
@@ -160,8 +171,7 @@ function selectAnswer(answer) {
 
 function nextQuestion() {
     currentQuestionIndex++;
-    const difficulty = difficultySelect.value;
-    const questionsArray = shuffleArray(questions[difficulty]);
+    const questionsArray = shuffleArray(questions[currentDifficulty]);
     if (currentQuestionIndex < questionsArray.length) {
         showQuestion(questionsArray[currentQuestionIndex]);
         nextButton.classList.add('hide');
@@ -198,6 +208,10 @@ function updateProgressBar() {
     progressFill.style.width = `${progress}%`;
 }
 
+function showHint() {
+    hintElement.classList.remove('hide');
+}
+
 function reviewAnswers() {
     reviewContainer.classList.remove('hide');
     answerReviewList.innerHTML = '';
@@ -225,4 +239,46 @@ function shuffleArray(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+function Mockgame() {
+    username = usernameInput.value || 'Guest';
+    profileNameElement.innerText = username;
+
+    currentQuestionIndex = 0;
+    score = 0;
+    scoreElement.innerText = score;
+    highScoreElement.innerText = highScore;
+
+    currentDifficulty = difficultySelect.value;
+    const questionsArray = shuffleArray(questions[currentDifficulty]);
+    totalQuestionsElement.innerText = questionsArray.length;
+
+    nextButton.classList.add('hide');
+    reviewButton.classList.add('hide');
+    scoreContainer.classList.add('hide');
+    reviewContainer.classList.add('hide');
+    leaderboardContainer.classList.add('hide');
+    profileContainer.classList.add('hide');
+    questionContainer.classList.remove('hide');
+    hintElement.classList.add('hide');
+
+    answerHistory = [];
+    showQuestion(questionsArray[currentQuestionIndex]);
+}
+
+function showQuest(question) {
+    categoryElement.innerText = `Category: ${question.category}`;
+    questionContainer.querySelector('#question').innerText = question.question;
+    hintElement.innerText = question.hint;
+    answerButtons.innerHTML = '';
+    question.answers.forEach(answer => {
+        const button = document.createElement('button');
+        button.innerText = answer.text;
+        button.classList.add('btn');
+        button.addEventListener('click', () => selectAnswer(answer));
+        answerButtons.appendChild(button);
+    });
+    startTimer();
+    currentQuestionElement.innerText = currentQuestionIndex + 1;
+    updateProgressBar();
 }
