@@ -122,3 +122,79 @@ body {
 #performance-metrics {
     margin-top: 20px;
 }
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.container {
+    text-align: center;
+}
+
+.hide {
+    display: none;
+}
+
+.btn {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.btn:hover {
+    background-color: #0056b3;
+}
+
+.btn-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+#progress-bar {
+    width: 100%;
+    background-color: #e0e0e0;
+    height: 20px;
+    margin: 10px 0;
+}
+
+#progress-fill {
+    height: 100%;
+    background-color: #007bff;
+    width: 0;
+}
+
+#timer {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#score-container,
+#review-container,
+#leaderboard-container,
+#achievements-container,
+#multiplayer-container {
+    margin-top: 20px;
+}
+
+#chat-container {
+    margin-top: 20px;
+}
+
+#chat-messages {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #fff;
+}

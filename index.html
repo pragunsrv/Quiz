@@ -54,6 +54,12 @@
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
             </select>
+            <label for="mode-filter">Filter by Mode:</label>
+            <select id="mode-filter" onchange="filterLeaderboard()">
+                <option value="">All</option>
+                <option value="single">Single Player</option>
+                <option value="multiplayer">Multiplayer</option>
+            </select>
             <ul id="leaderboard-list">
                 <!-- Leaderboard will be added dynamically -->
             </ul>
@@ -119,6 +125,31 @@
             <ul id="achievements-list">
                 <!-- Achievements will be added dynamically -->
             </ul>
+        </div>
+        <div id="multiplayer-container" class="hide">
+            <h2>Multiplayer Mode</h2>
+            <label for="multiplayer-room">Enter Room Code:</label>
+            <input type="text" id="multiplayer-room" placeholder="Room Code">
+            <button id="join-room-button" class="btn" onclick="joinRoom()">Join Room</button>
+            <button id="create-room-button" class="btn" onclick="createRoom()">Create Room</button>
+            <div id="chat-container" class="hide">
+                <h3>Chat</h3>
+                <div id="chat-messages"></div>
+                <input type="text" id="chat-input" placeholder="Type a message">
+                <button id="send-message-button" class="btn" onclick="sendMessage()">Send</button>
+            </div>
+            <div id="multiplayer-questions-container" class="hide">
+                <p id="multiplayer-question"></p>
+                <div id="multiplayer-answer-buttons" class="btn-container">
+                    <!-- Buttons will be added dynamically -->
+                </div>
+                <p id="multiplayer-timer">Time left: <span id="multiplayer-timer-count">30</span> seconds</p>
+                <p id="multiplayer-progress">Question <span id="multiplayer-current-question">1</span> of <span id="multiplayer-total-questions">2</span></p>
+                <div id="multiplayer-progress-bar">
+                    <div id="multiplayer-progress-fill"></div>
+                </div>
+                <p id="multiplayer-score">Your Score: <span id="multiplayer-score-value">0</span></p>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
