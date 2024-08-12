@@ -112,3 +112,13 @@ body {
     padding: 10px;
     border-radius: 5px;
 }
+/* Add the following to your existing styles.css */
+
+#category-select {
+    margin-top: 10px;
+    padding: 5px;
+}
+
+#performance-metrics {
+    margin-top: 20px;
+}

@@ -15,7 +15,7 @@
             <button id="start-button" class="btn" onclick="startGame()">Start Game</button>
         </div>
         <div id="quiz-container" class="hide">
-            <p id="category"></p>
+            <p id="category">Category: <span id="selected-category">All</span></p>
             <p id="question"></p>
             <button id="hint-button" class="btn" onclick="showHint()">Get Hint</button>
             <p id="hint" class="hide"></p>
@@ -27,6 +27,10 @@
             <div id="progress-bar">
                 <div id="progress-fill"></div>
             </div>
+            <p id="performance-metrics" class="hide">
+                Average Response Time: <span id="avg-response-time">0</span> seconds<br>
+                Accuracy: <span id="accuracy">0%</span>
+            </p>
         </div>
         <button id="next-button" class="btn" onclick="nextQuestion()">Next</button>
         <button id="review-button" class="btn hide" onclick="reviewAnswers()">Review Answers</button>
@@ -53,6 +57,18 @@
             <ul id="leaderboard-list">
                 <!-- Leaderboard will be added dynamically -->
             </ul>
+        </div>
+        <div id="category-container">
+            <label for="category-select">Select Category:</label>
+            <select id="category-select" onchange="changeCategory()">
+                <option value="">All</option>
+                <option value="Geography">Geography</option>
+                <option value="Literature">Literature</option>
+                <option value="Science">Science</option>
+                <option value="History">History</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Technology">Technology</option>
+            </select>
         </div>
         <div id="difficulty-container">
             <label for="difficulty">Select Difficulty:</label>
