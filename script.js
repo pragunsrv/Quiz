@@ -24,6 +24,7 @@ const leaderboardContainer = document.getElementById('leaderboard-container');
 const leaderboardList = document.getElementById('leaderboard-list');
 const hintButton = document.getElementById('hint-button');
 const hintElement = document.getElementById('hint');
+const difficultyFilter = document.getElementById('difficulty-filter');
 
 const questions = {
     easy: [
@@ -160,12 +161,14 @@ function selectAnswer(answer) {
         scoreElement.innerText = score;
     } else {
         alert('Wrong!');
+        if (answerHistory.length < 5) {
+            answerHistory.push({
+                question: document.getElementById('question').innerText,
+                selectedAnswer: answer.text,
+                correct: correct
+            });
+        }
     }
-    answerHistory.push({
-        question: document.getElementById('question').innerText,
-        selectedAnswer: answer.text,
-        correct: correct
-    });
     nextButton.classList.remove('hide');
 }
 
@@ -181,7 +184,7 @@ function nextQuestion() {
             localStorage.setItem('highScore', highScore);
             highScoreElement.innerText = highScore;
         }
-        leaderboard.push({ username, score });
+        leaderboard.push({ username, score, difficulty: currentDifficulty });
         localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
         showLeaderboard();
         questionContainer.classList.add('hide');
@@ -226,11 +229,19 @@ function showLeaderboard() {
     leaderboard.sort((a, b) => b.score - a.score);
     leaderboardContainer.classList.remove('hide');
     leaderboardList.innerHTML = '';
-    leaderboard.forEach(entry => {
-        const listItem = document.createElement('li');
-        listItem.innerText = `${entry.username}: ${entry.score}`;
-        leaderboardList.appendChild(listItem);
-    });
+    filterLeaderboard();
+}
+
+function filterLeaderboard() {
+    const filterValue = difficultyFilter.value;
+    leaderboardList.innerHTML = '';
+    leaderboard
+        .filter(entry => !filterValue || entry.difficulty === filterValue)
+        .forEach(entry => {
+            const listItem = document.createElement('li');
+            listItem.innerText = `${entry.username} (${entry.difficulty}): ${entry.score}`;
+            leaderboardList.appendChild(listItem);
+        });
 }
 
 function shuffleArray(array) {
@@ -240,6 +251,7 @@ function shuffleArray(array) {
     }
     return array;
 }
+
 function Mockgame() {
     username = usernameInput.value || 'Guest';
     profileNameElement.innerText = username;
@@ -281,4 +293,35 @@ function showQuest(question) {
     startTimer();
     currentQuestionElement.innerText = currentQuestionIndex + 1;
     updateProgressBar();
+}
+function endTimer() {
+    timeLeft = parseInt(timerLengthSelect.value, 10);
+    timerCount.innerText = timeLeft;
+    timer = setInterval(() => {
+        timeLeft--;
+        timerCount.innerText = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            selectAnswer({ correct: false }); // Time's up, mark as incorrect
+        }
+    }, 1000);
+}
+
+function swgrateProgressBar() {
+    const progress = (currentQuestionIndex / (totalQuestionsElement.innerText - 1)) * 100;
+    progressFill.style.width = `${progress}%`;
+}
+
+function shownone() {
+    hintElement.classList.remove('hide');
+}
+
+function WrongAnswers() {
+    reviewContainer.classList.remove('hide');
+    answerReviewList.innerHTML = '';
+    answerHistory.forEach(answer => {
+        const listItem = document.createElement('li');
+        listItem.innerText = `${answer.question} - Your Answer: ${answer.selectedAnswer} - ${answer.correct ? 'Correct' : 'Incorrect'}`;
+        answerReviewList.appendChild(listItem);
+    });
 }

@@ -43,6 +43,13 @@
         </div>
         <div id="leaderboard-container" class="hide">
             <h2>Leaderboard</h2>
+            <label for="difficulty-filter">Filter by Difficulty:</label>
+            <select id="difficulty-filter" onchange="filterLeaderboard()">
+                <option value="">All</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
             <ul id="leaderboard-list">
                 <!-- Leaderboard will be added dynamically -->
             </ul>

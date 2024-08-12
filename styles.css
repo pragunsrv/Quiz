@@ -91,3 +91,24 @@ body {
     padding: 10px;
     border-radius: 5px;
 }
+
+#difficulty-filter {
+    margin-top: 10px;
+    padding: 5px;
+}
+
+#review-container {
+    margin-top: 20px;
+}
+
+#answer-review-list {
+    list-style: none;
+    padding: 0;
+}
+
+#answer-review-list li {
+    background-color: #f4f4f4;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
