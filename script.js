@@ -5,11 +5,15 @@ const timerCount = document.getElementById('timer-count');
 const scoreElement = document.getElementById('score');
 const scoreContainer = document.getElementById('score-container');
 const categoryElement = document.getElementById('category');
+const progressElement = document.getElementById('progress');
+const currentQuestionElement = document.getElementById('current-question');
+const totalQuestionsElement = document.getElementById('total-questions');
 
 const questions = [
     {
         category: 'Geography',
         question: 'What is the capital of France?',
+        type: 'multiple-choice',
         answers: [
             { text: 'Berlin', correct: false },
             { text: 'Madrid', correct: false },
@@ -19,12 +23,11 @@ const questions = [
     },
     {
         category: 'Literature',
-        question: 'Who wrote "To Kill a Mockingbird"?',
+        question: 'Is "To Kill a Mockingbird" written by Harper Lee?',
+        type: 'true-false',
         answers: [
-            { text: 'Harper Lee', correct: true },
-            { text: 'J.K. Rowling', correct: false },
-            { text: 'Ernest Hemingway', correct: false },
-            { text: 'Mark Twain', correct: false }
+            { text: 'True', correct: true },
+            { text: 'False', correct: false }
         ]
     }
 ];
@@ -38,8 +41,10 @@ function startGame() {
     currentQuestionIndex = 0;
     score = 0;
     scoreElement.innerText = score;
+    totalQuestionsElement.innerText = questions.length;
     nextButton.classList.add('hide');
     scoreContainer.classList.add('hide');
+    questionContainer.classList.remove('hide');
     showQuestion(questions[currentQuestionIndex]);
 }
 
@@ -55,6 +60,7 @@ function showQuestion(question) {
         answerButtons.appendChild(button);
     });
     startTimer();
+    currentQuestionElement.innerText = currentQuestionIndex + 1;
 }
 
 function selectAnswer(answer) {
@@ -76,8 +82,8 @@ function nextQuestion() {
         showQuestion(questions[currentQuestionIndex]);
         nextButton.classList.add('hide');
     } else {
-        scoreContainer.classList.remove('hide');
         questionContainer.classList.add('hide');
+        scoreContainer.classList.remove('hide');
         nextButton.classList.add('hide');
     }
 }
