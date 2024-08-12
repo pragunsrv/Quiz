@@ -38,22 +38,27 @@ const newCategorySelect = document.getElementById('new-category');
 const newDifficultySelect = document.getElementById('new-difficulty');
 const newAnswersInput = document.getElementById('new-answers');
 const addQuestionButton = document.getElementById('add-question-button');
+const editQuestionIdInput = document.getElementById('edit-question-id');
+const editQuestionButton = document.getElementById('edit-question-button');
+const achievementsContainer = document.getElementById('achievements-container');
+const achievementsList = document.getElementById('achievements-list');
 
+let profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+let questions = JSON.parse(localStorage.getItem('questions')) || {};
+let currentProfile;
 let currentQuestionIndex = 0;
 let score = 0;
+let highScore = 0;
+let currentDifficulty;
+let currentCategory;
 let timer;
 let timeLeft;
-let highScore = localStorage.getItem('highScore') || 0;
-let username = 'Guest';
 let answerHistory = [];
-let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-let profiles = JSON.parse(localStorage.getItem('profiles')) || [];
-let currentProfile = null;
-let currentDifficulty = 'easy';
-let currentCategory = '';
+let achievements = JSON.parse(localStorage.getItem('achievements')) || [];
 
 function loadProfiles() {
-    profileSelect.innerHTML = '';
+    profileSelect.innerHTML = '<option value="">Select Profile</option>';
     profiles.forEach(profile => {
         const option = document.createElement('option');
         option.value = profile.name;
@@ -182,6 +187,7 @@ function nextQuestion() {
         scoreContainer.classList.remove('hide');
         reviewButton.classList.remove('hide');
         calculatePerformanceMetrics();
+        checkAchievements();
     }
 }
 
@@ -278,12 +284,69 @@ function addQuestion() {
     }
 }
 
-function calculatePerformanceMetrics() {
-    const totalAnswers = answerHistory.length;
-    const correctAnswers = answerHistory.filter(answer => answer.correct).length;
-    const avgResponseTime = timeLeft > 0 ? (parseInt(timerLengthSelect.value, 10) - timeLeft) / totalAnswers : 0;
-    avgResponseTimeElement.innerText = avgResponseTime.toFixed(2);
-    accuracyElement.innerText = ((correctAnswers / totalAnswers) * 100).toFixed(2) + '%';
+function editQuestion() {
+    const questionId = parseInt(editQuestionIdInput.value, 10);
+    const questionText = newQuestionInput.value;
+    const hintText = newHintInput.value;
+    const category = newCategorySelect.value;
+    const difficulty = newDifficultySelect.value;
+    const answers = newAnswersInput.value.split(',').map(text => text.trim());
+    const correctAnswer = answers.shift();
+
+    if (questionId && questionText && hintText && category && difficulty && answers.length) {
+        let questionToEdit;
+        Object.values(questions).forEach(cat => {
+            if (cat[difficulty]) {
+                questionToEdit = cat[difficulty].find((_, index) => index === questionId);
+            }
+        });
+
+        if (questionToEdit) {
+            questionToEdit.question = questionText;
+            questionToEdit.hint = hintText;
+            questionToEdit.answers = answers.map(answer => ({ text: answer, correct: answer === correctAnswer }));
+
+            localStorage.setItem('questions', JSON.stringify(questions));
+            alert('Question edited successfully!');
+            newQuestionInput.value = '';
+            newHintInput.value = '';
+            newAnswersInput.value = '';
+            editQuestionIdInput.value = '';
+        } else {
+            alert('Question not found.');
+        }
+    } else {
+        alert('Please fill in all fields.');
+    }
+}
+
+function checkAchievements() {
+    const achievementsUnlocked = [];
+    
+    if (score >= 10) {
+        achievementsUnlocked.push('Score of 10 or more');
+    }
+    if (score >= 50) {
+        achievementsUnlocked.push('Score of 50 or more');
+    }
+
+    achievementsUnlocked.forEach(achievement => {
+        if (!achievements.includes(achievement)) {
+            achievements.push(achievement);
+        }
+    });
+
+    localStorage.setItem('achievements', JSON.stringify(achievements));
+    updateAchievements();
+}
+
+function updateAchievements() {
+    achievementsList.innerHTML = '';
+    achievements.forEach(achievement => {
+        const listItem = document.createElement('li');
+        listItem.innerText = achievement;
+        achievementsList.appendChild(listItem);
+    });
 }
 
 loadProfiles();

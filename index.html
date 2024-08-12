@@ -87,7 +87,7 @@
             </select>
         </div>
         <div id="question-bank-container">
-            <h2>Add Your Own Questions</h2>
+            <h2>Add or Edit Questions</h2>
             <label for="new-question">Question:</label>
             <input type="text" id="new-question">
             <label for="new-hint">Hint:</label>
@@ -110,6 +110,15 @@
             <label for="new-answers">Answers (comma-separated correct answer first):</label>
             <input type="text" id="new-answers">
             <button id="add-question-button" class="btn" onclick="addQuestion()">Add Question</button>
+            <label for="edit-question-id">Edit Question ID:</label>
+            <input type="number" id="edit-question-id">
+            <button id="edit-question-button" class="btn" onclick="editQuestion()">Edit Question</button>
+        </div>
+        <div id="achievements-container" class="hide">
+            <h2>Achievements</h2>
+            <ul id="achievements-list">
+                <!-- Achievements will be added dynamically -->
+            </ul>
         </div>
     </div>
     <script src="script.js"></script>
