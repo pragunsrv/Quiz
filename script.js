@@ -1,3 +1,4 @@
+
 const profileSelect = document.getElementById('profile-select');
 const usernameInput = document.getElementById('username');
 const createProfileButton = document.getElementById('create-profile-button');
@@ -44,6 +45,9 @@ const multiplayerTimerElement = document.getElementById('multiplayer-timer-count
 const multiplayerProgressElement = document.getElementById('multiplayer-progress');
 const multiplayerProgressFill = document.getElementById('multiplayer-progress-fill');
 const multiplayerScoreElement = document.getElementById('multiplayer-score-value');
+const feedbackElement = document.getElementById('feedback');
+const analyticsContainer = document.getElementById('analytics-container');
+const questionPerformanceList = document.getElementById('question-performance-list');
 
 let currentQuestionIndex = 0;
 let score = 0;
@@ -57,6 +61,214 @@ let profiles = [];
 let currentProfile = '';
 let multiplayerRoom = '';
 let multiplayerScore = 0;
+let questionPerformance = [];
+
+function loadProfiles() {
+    const profilesFromStorage = JSON.parse(localStorage.getItem('profiles')) || [];
+    profiles = profilesFromStorage;
+    profileSelect.innerHTML = profiles.map(profile => `<option value="${profile.name}">${profile.name}</option>`).join('');
+}
+
+function switchProfile() {
+    currentProfile = profileSelect.value;
+}
+
+function createProfile() {
+    const username = usernameInput.value;
+    if (username) {
+        profiles.push({ name: username, highScore: 0 });
+        localStorage.setItem('profiles', JSON.stringify(profiles));
+        loadProfiles();
+        profileSelect.value = username;
+        currentProfile = username;
+    }
+}
+
+function startGame() {
+    quizContainer.classList.remove('hide');
+    loadQuestions();
+    startTimer();
+}
+
+function loadQuestions() {
+    // Simulate loading questions from a question bank
+    questions = [
+        { question: 'What is the capital of France?', answers: ['Paris', 'London', 'Berlin', 'Rome'], correct: 'Paris', hint: 'It\'s known as the city of lights.' },
+        { question: 'What is 2 + 2?', answers: ['3', '4', '5', '6'], correct: '4', hint: 'It\'s an even number.' }
+    ];
+    showQuestion(questions[currentQuestionIndex]);
+}
+
+function showQuestion(questionObj) {
+    questionElement.textContent = questionObj.question;
+    hintElement.textContent = questionObj.hint;
+    answerButtons.innerHTML = questionObj.answers.map(answer => 
+        `<button class="btn" onclick="submitAnswer('${answer}')">${answer}</button>`
+    ).join('');
+    hintElement.classList.add('hide');
+    feedbackElement.classList.add('hide');
+}
+
+function showHint() {
+    hintElement.classList.remove('hide');
+}
+
+function submitAnswer(answer) {
+    const questionObj = questions[currentQuestionIndex];
+    if (answer === questionObj.correct) {
+        score += 10;
+        feedbackElement.textContent = 'Correct!';
+        updateQuestionPerformance(questionObj.question, true);
+    } else {
+        feedbackElement.textContent = `Incorrect! The correct answer was ${questionObj.correct}.`;
+        updateQuestionPerformance(questionObj.question, false);
+    }
+    feedbackElement.classList.remove('hide');
+    nextQuestion();
+}
+
+function nextQuestion() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        showQuestion(questions[currentQuestionIndex]);
+    } else {
+        endGame();
+    }
+}
+
+function endGame() {
+    quizContainer.classList.add('hide');
+    scoreContainer.classList.remove('hide');
+    scoreElement.textContent = score;
+    highScore = Math.max(score, highScore);
+    highScoreElement.textContent = highScore;
+    updateLeaderboard();
+    showAnalytics();
+}
+
+function updateLeaderboard() {
+    leaderboard.push({ name: currentProfile, score });
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboardList.innerHTML = leaderboard.map(entry => 
+        `<li>${entry.name}: ${entry.score}</li>`
+    ).join('');
+}
+
+function filterLeaderboard() {
+    // Filtering logic for leaderboard
+}
+
+function changeCategory() {
+    currentCategory = categorySelect.value;
+    loadQuestions();
+}
+
+function addQuestion() {
+    const question = newQuestionInput.value;
+    const hint = newHintInput.value;
+    const category = newCategorySelect.value;
+    const difficulty = newDifficultySelect.value;
+    const answers = newAnswersInput.value.split(',').map(a => a.trim());
+    const correct = answers.shift();
+    questions.push({ question, hint, category, difficulty, answers, correct });
+    alert('Question added!');
+}
+
+function editQuestion() {
+    const id = parseInt(editQuestionIdInput.value);
+    if (id >= 0 && id < questions.length) {
+        const question = newQuestionInput.value;
+        const hint = newHintInput.value;
+        const category = newCategorySelect.value;
+        const difficulty = newDifficultySelect.value;
+        const answers = newAnswersInput.value.split(',').map(a => a.trim());
+        const correct = answers.shift();
+        questions[id] = { question, hint, category, difficulty, answers, correct };
+        alert('Question edited!');
+    }
+}
+
+function updateAchievements() {
+    // Update the achievements list
+}
+
+function createRoom() {
+    multiplayerRoom = 'ROOM' + Math.floor(Math.random() * 10000);
+    multiplayerRoomInput.value = multiplayerRoom;
+    multiplayerContainer.classList.remove('hide');
+}
+
+function joinRoom() {
+    multiplayerRoom = multiplayerRoomInput.value;
+    if (multiplayerRoom) {
+        multiplayerContainer.classList.remove('hide');
+    }
+}
+
+function sendMessage() {
+    const message = chatInput.value;
+    if (message) {
+        const messageElement = document.createElement('div');
+        messageElement.textContent = `You: ${message}`;
+        chatMessages.appendChild(messageElement);
+        chatInput.value = '';
+    }
+}
+
+function startMultiplayerGame() {
+    multiplayerQuestionsContainer.classList.remove('hide');
+    // Initialize multiplayer game state here
+}
+
+function updateMultiplayerQuestion(question, answers) {
+    document.getElementById('multiplayer-question').textContent = question;
+    const buttonsHtml = answers.map(answer => 
+        `<button class="btn" onclick="submitMultiplayerAnswer('${answer}')">${answer}</button>`
+    ).join('');
+    multiplayerAnswerButtons.innerHTML = buttonsHtml;
+}
+
+function submitMultiplayerAnswer(answer) {
+    // Handle multiplayer answer submission
+}
+
+function updateMultiplayerScore(score) {
+    multiplayerScoreElement.textContent = score;
+}
+
+function updateMultiplayerTimer(time) {
+    multiplayerTimerElement.textContent = time;
+    // Implement multiplayer timer logic
+}
+
+function updateMultiplayerProgress(questionNumber, totalQuestions) {
+    document.getElementById('multiplayer-current-question').textContent = questionNumber;
+    document.getElementById('multiplayer-total-questions').textContent = totalQuestions;
+    // Update multiplayer progress bar here
+}
+
+function updateQuestionPerformance(question, correct) {
+    const performance = {
+        question: question,
+        correct: correct,
+        timestamp: new Date().toLocaleString()
+    };
+    questionPerformance.push(performance);
+    localStorage.setItem('questionPerformance', JSON.stringify(questionPerformance));
+}
+
+function showAnalytics() {
+    analyticsContainer.classList.remove('hide');
+    const performanceData = JSON.parse(localStorage.getItem('questionPerformance')) || [];
+    questionPerformanceList.innerHTML = performanceData.map(data => 
+        `<li>${data.question}: ${data.correct ? 'Correct' : 'Incorrect'} (${data.timestamp})</li>`
+    ).join('');
+}
+
+// Initialize game
+loadProfiles();
+
+
 
 function loadProfiles() {
     const profilesFromStorage = JSON.parse(localStorage.getItem('profiles')) || [];
