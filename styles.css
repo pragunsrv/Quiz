@@ -50,3 +50,22 @@ body {
 #profile-container, #difficulty-container, #timer-settings {
     margin-top: 20px;
 }
+
+#progress-bar {
+    width: 100%;
+    background-color: #ddd;
+    border-radius: 5px;
+    height: 20px;
+    margin-top: 20px;
+    position: relative;
+}
+
+#progress-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0;
+    border-radius: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

@@ -22,12 +22,22 @@
             </div>
             <p id="timer">Time left: <span id="timer-count">30</span> seconds</p>
             <p id="progress">Question <span id="current-question">1</span> of <span id="total-questions">2</span></p>
+            <div id="progress-bar">
+                <div id="progress-fill"></div>
+            </div>
         </div>
         <button id="next-button" class="btn" onclick="nextQuestion()">Next</button>
+        <button id="review-button" class="btn hide" onclick="reviewAnswers()">Review Answers</button>
         <div id="score-container" class="hide">
             <h2>Your Score: <span id="score">0</span></h2>
             <h2>High Score: <span id="high-score">0</span></h2>
             <p>Username: <span id="profile-name">Guest</span></p>
+            <div id="review-container" class="hide">
+                <h3>Review Your Answers</h3>
+                <ul id="answer-review-list">
+                    <!-- Answer review list will be added dynamically -->
+                </ul>
+            </div>
         </div>
         <div id="difficulty-container">
             <label for="difficulty">Select Difficulty:</label>

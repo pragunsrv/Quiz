@@ -4,6 +4,7 @@ const startButton = document.getElementById('start-button');
 const questionContainer = document.getElementById('quiz-container');
 const answerButtons = document.getElementById('answer-buttons');
 const nextButton = document.getElementById('next-button');
+const reviewButton = document.getElementById('review-button');
 const timerCount = document.getElementById('timer-count');
 const scoreElement = document.getElementById('score');
 const scoreContainer = document.getElementById('score-container');
@@ -12,9 +13,13 @@ const categoryElement = document.getElementById('category');
 const progressElement = document.getElementById('progress');
 const currentQuestionElement = document.getElementById('current-question');
 const totalQuestionsElement = document.getElementById('total-questions');
+const progressBar = document.getElementById('progress-bar');
+const progressFill = document.getElementById('progress-fill');
 const difficultySelect = document.getElementById('difficulty');
 const timerLengthSelect = document.getElementById('timer-length');
 const profileNameElement = document.getElementById('profile-name');
+const reviewContainer = document.getElementById('review-container');
+const answerReviewList = document.getElementById('answer-review-list');
 
 const questions = {
     easy: [
@@ -89,6 +94,7 @@ let timer;
 let timeLeft;
 let highScore = localStorage.getItem('highScore') || 0;
 let username = 'Guest';
+let answerHistory = [];
 
 function startGame() {
     username = usernameInput.value || 'Guest';
@@ -104,9 +110,13 @@ function startGame() {
     totalQuestionsElement.innerText = questionsArray.length;
 
     nextButton.classList.add('hide');
+    reviewButton.classList.add('hide');
     scoreContainer.classList.add('hide');
+    reviewContainer.classList.add('hide');
     profileContainer.classList.add('hide');
     questionContainer.classList.remove('hide');
+
+    answerHistory = [];
     showQuestion(shuffleArray(questionsArray)[currentQuestionIndex]);
 }
 
@@ -123,6 +133,7 @@ function showQuestion(question) {
     });
     startTimer();
     currentQuestionElement.innerText = currentQuestionIndex + 1;
+    updateProgressBar();
 }
 
 function selectAnswer(answer) {
@@ -134,6 +145,11 @@ function selectAnswer(answer) {
     } else {
         alert('Wrong!');
     }
+    answerHistory.push({
+        question: document.getElementById('question').innerText,
+        selectedAnswer: answer.text,
+        correct: correct
+    });
     clearInterval(timer);
     nextButton.classList.remove('hide');
 }
@@ -153,7 +169,7 @@ function nextQuestion() {
         }
         questionContainer.classList.add('hide');
         scoreContainer.classList.remove('hide');
-        nextButton.classList.add('hide');
+        reviewButton.classList.remove('hide');
     }
 }
 
@@ -168,6 +184,21 @@ function startTimer() {
             selectAnswer({ correct: false }); // Time's up, mark as incorrect
         }
     }, 1000);
+}
+
+function updateProgressBar() {
+    const progress = (currentQuestionIndex / (totalQuestionsElement.innerText - 1)) * 100;
+    progressFill.style.width = `${progress}%`;
+}
+
+function reviewAnswers() {
+    reviewContainer.classList.remove('hide');
+    answerReviewList.innerHTML = '';
+    answerHistory.forEach(answer => {
+        const listItem = document.createElement('li');
+        listItem.innerText = `${answer.question} - Your Answer: ${answer.selectedAnswer} - ${answer.correct ? 'Correct' : 'Incorrect'}`;
+        answerReviewList.appendChild(listItem);
+    });
 }
 
 function shuffleArray(array) {
