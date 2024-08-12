@@ -20,6 +20,8 @@ const timerLengthSelect = document.getElementById('timer-length');
 const profileNameElement = document.getElementById('profile-name');
 const reviewContainer = document.getElementById('review-container');
 const answerReviewList = document.getElementById('answer-review-list');
+const leaderboardContainer = document.getElementById('leaderboard-container');
+const leaderboardList = document.getElementById('leaderboard-list');
 
 const questions = {
     easy: [
@@ -95,6 +97,7 @@ let timeLeft;
 let highScore = localStorage.getItem('highScore') || 0;
 let username = 'Guest';
 let answerHistory = [];
+let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
 
 function startGame() {
     username = usernameInput.value || 'Guest';
@@ -106,18 +109,19 @@ function startGame() {
     highScoreElement.innerText = highScore;
 
     const difficulty = difficultySelect.value;
-    const questionsArray = questions[difficulty];
+    const questionsArray = shuffleArray(questions[difficulty]);
     totalQuestionsElement.innerText = questionsArray.length;
 
     nextButton.classList.add('hide');
     reviewButton.classList.add('hide');
     scoreContainer.classList.add('hide');
     reviewContainer.classList.add('hide');
+    leaderboardContainer.classList.add('hide');
     profileContainer.classList.add('hide');
     questionContainer.classList.remove('hide');
 
     answerHistory = [];
-    showQuestion(shuffleArray(questionsArray)[currentQuestionIndex]);
+    showQuestion(questionsArray[currentQuestionIndex]);
 }
 
 function showQuestion(question) {
@@ -137,6 +141,7 @@ function showQuestion(question) {
 }
 
 function selectAnswer(answer) {
+    clearInterval(timer);
     const correct = answer.correct;
     if (correct) {
         alert('Correct!');
@@ -150,14 +155,13 @@ function selectAnswer(answer) {
         selectedAnswer: answer.text,
         correct: correct
     });
-    clearInterval(timer);
     nextButton.classList.remove('hide');
 }
 
 function nextQuestion() {
     currentQuestionIndex++;
     const difficulty = difficultySelect.value;
-    const questionsArray = questions[difficulty];
+    const questionsArray = shuffleArray(questions[difficulty]);
     if (currentQuestionIndex < questionsArray.length) {
         showQuestion(questionsArray[currentQuestionIndex]);
         nextButton.classList.add('hide');
@@ -167,6 +171,9 @@ function nextQuestion() {
             localStorage.setItem('highScore', highScore);
             highScoreElement.innerText = highScore;
         }
+        leaderboard.push({ username, score });
+        localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        showLeaderboard();
         questionContainer.classList.add('hide');
         scoreContainer.classList.remove('hide');
         reviewButton.classList.remove('hide');
@@ -198,6 +205,17 @@ function reviewAnswers() {
         const listItem = document.createElement('li');
         listItem.innerText = `${answer.question} - Your Answer: ${answer.selectedAnswer} - ${answer.correct ? 'Correct' : 'Incorrect'}`;
         answerReviewList.appendChild(listItem);
+    });
+}
+
+function showLeaderboard() {
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboardContainer.classList.remove('hide');
+    leaderboardList.innerHTML = '';
+    leaderboard.forEach(entry => {
+        const listItem = document.createElement('li');
+        listItem.innerText = `${entry.username}: ${entry.score}`;
+        leaderboardList.appendChild(listItem);
     });
 }
 

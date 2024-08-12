@@ -69,3 +69,20 @@ body {
     top: 0;
     left: 0;
 }
+
+#leaderboard-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+#leaderboard-list {
+    list-style: none;
+    padding: 0;
+}
+
+#leaderboard-list li {
+    background-color: #f4f4f4;
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
