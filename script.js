@@ -1,5 +1,7 @@
 const profileContainer = document.getElementById('profile-container');
+const profileSelect = document.getElementById('profile-select');
 const usernameInput = document.getElementById('username');
+const createProfileButton = document.getElementById('create-profile-button');
 const startButton = document.getElementById('start-button');
 const questionContainer = document.getElementById('quiz-container');
 const answerButtons = document.getElementById('answer-buttons');
@@ -17,7 +19,10 @@ const progressBar = document.getElementById('progress-bar');
 const progressFill = document.getElementById('progress-fill');
 const difficultySelect = document.getElementById('difficulty');
 const timerLengthSelect = document.getElementById('timer-length');
-const profileNameElement = document.getElementById('profile-name');
+const avgResponseTimeElement = document.getElementById('avg-response-time');
+const accuracyElement = document.getElementById('accuracy');
+const totalQuestionsAnsweredElement = document.getElementById('total-questions-answered');
+const avgScoreElement = document.getElementById('avg-score');
 const reviewContainer = document.getElementById('review-container');
 const answerReviewList = document.getElementById('answer-review-list');
 const leaderboardContainer = document.getElementById('leaderboard-container');
@@ -26,51 +31,13 @@ const hintButton = document.getElementById('hint-button');
 const hintElement = document.getElementById('hint');
 const difficultyFilter = document.getElementById('difficulty-filter');
 const categorySelect = document.getElementById('category-select');
-const performanceMetrics = document.getElementById('performance-metrics');
-const avgResponseTimeElement = document.getElementById('avg-response-time');
-const accuracyElement = document.getElementById('accuracy');
-
-const questions = {
-    Geography: {
-        easy: [
-            {
-                question: 'What is the capital of France?',
-                hint: 'It is also known as the City of Lights.',
-                answers: [
-                    { text: 'Berlin', correct: false },
-                    { text: 'Madrid', correct: false },
-                    { text: 'Paris', correct: true },
-                    { text: 'Rome', correct: false }
-                ]
-            }
-        ],
-        medium: [
-            {
-                question: 'Which is the largest continent?',
-                hint: 'It is home to the Great Wall of China.',
-                answers: [
-                    { text: 'Africa', correct: false },
-                    { text: 'Asia', correct: true },
-                    { text: 'Europe', correct: false },
-                    { text: 'Australia', correct: false }
-                ]
-            }
-        ]
-    },
-    Literature: {
-        easy: [
-            {
-                question: 'Is "To Kill a Mockingbird" written by Harper Lee?',
-                hint: 'The author is known for this classic novel.',
-                answers: [
-                    { text: 'True', correct: true },
-                    { text: 'False', correct: false }
-                ]
-            }
-        ]
-    },
-    // Add other categories and difficulties similarly...
-};
+const questionBankContainer = document.getElementById('question-bank-container');
+const newQuestionInput = document.getElementById('new-question');
+const newHintInput = document.getElementById('new-hint');
+const newCategorySelect = document.getElementById('new-category');
+const newDifficultySelect = document.getElementById('new-difficulty');
+const newAnswersInput = document.getElementById('new-answers');
+const addQuestionButton = document.getElementById('add-question-button');
 
 let currentQuestionIndex = 0;
 let score = 0;
@@ -80,17 +47,61 @@ let highScore = localStorage.getItem('highScore') || 0;
 let username = 'Guest';
 let answerHistory = [];
 let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+let profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+let currentProfile = null;
 let currentDifficulty = 'easy';
 let currentCategory = '';
 
-function startGame() {
-    username = usernameInput.value || 'Guest';
-    profileNameElement.innerText = username;
+function loadProfiles() {
+    profileSelect.innerHTML = '';
+    profiles.forEach(profile => {
+        const option = document.createElement('option');
+        option.value = profile.name;
+        option.innerText = profile.name;
+        profileSelect.appendChild(option);
+    });
+    if (profiles.length > 0) {
+        profileSelect.value = profiles[0].name;
+        currentProfile = profiles[0];
+        usernameInput.value = currentProfile.name;
+        loadProfile();
+    }
+}
 
+function switchProfile() {
+    const selectedProfileName = profileSelect.value;
+    currentProfile = profiles.find(profile => profile.name === selectedProfileName);
+    usernameInput.value = currentProfile.name;
+    loadProfile();
+}
+
+function createProfile() {
+    const name = usernameInput.value;
+    if (name && !profiles.some(profile => profile.name === name)) {
+        profiles.push({ name, highScore: 0 });
+        localStorage.setItem('profiles', JSON.stringify(profiles));
+        loadProfiles();
+    }
+}
+
+function loadProfile() {
+    username = currentProfile.name;
+    profileNameElement.innerText = username;
+    highScore = currentProfile.highScore;
+    highScoreElement.innerText = highScore;
+    startGame();
+}
+
+function startGame() {
+    if (!currentProfile) {
+        alert('Please select or create a profile first.');
+        return;
+    }
     currentQuestionIndex = 0;
     score = 0;
     scoreElement.innerText = score;
-    highScoreElement.innerText = highScore;
+    totalQuestionsAnsweredElement.innerText = 0;
+    avgScoreElement.innerText = 0;
 
     currentDifficulty = difficultySelect.value;
     currentCategory = categorySelect.value;
@@ -106,19 +117,10 @@ function startGame() {
     profileContainer.classList.add('hide');
     questionContainer.classList.remove('hide');
     hintElement.classList.add('hide');
-    performanceMetrics.classList.add('hide');
+    performanceMetrics.classList.remove('hide');
 
     answerHistory = [];
     showQuestion(questionsArray[currentQuestionIndex]);
-
-    // Load saved progress if any
-    const savedProgress = JSON.parse(localStorage.getItem('savedProgress'));
-    if (savedProgress && savedProgress.username === username) {
-        currentQuestionIndex = savedProgress.questionIndex;
-        score = savedProgress.score;
-        scoreElement.innerText = score;
-        showQuestion(getQuestionsForCategoryAndDifficulty()[currentQuestionIndex]);
-    }
 }
 
 function showQuestion(question) {
@@ -155,6 +157,8 @@ function selectAnswer(answer) {
             });
         }
     }
+    totalQuestionsAnsweredElement.innerText = currentQuestionIndex + 1;
+    avgScoreElement.innerText = (score / (currentQuestionIndex + 1)).toFixed(2);
     nextButton.classList.remove('hide');
 }
 
@@ -164,11 +168,11 @@ function nextQuestion() {
     if (currentQuestionIndex < questionsArray.length) {
         showQuestion(questionsArray[currentQuestionIndex]);
         nextButton.classList.add('hide');
-        saveProgress();
     } else {
         if (score > highScore) {
+            currentProfile.highScore = score;
+            localStorage.setItem('profiles', JSON.stringify(profiles));
             highScore = score;
-            localStorage.setItem('highScore', highScore);
             highScoreElement.innerText = highScore;
         }
         leaderboard.push({ username, score, difficulty: currentDifficulty, category: currentCategory });
@@ -177,7 +181,6 @@ function nextQuestion() {
         questionContainer.classList.add('hide');
         scoreContainer.classList.remove('hide');
         reviewButton.classList.remove('hide');
-        performanceMetrics.classList.remove('hide');
         calculatePerformanceMetrics();
     }
 }
@@ -246,13 +249,33 @@ function getQuestionsForCategoryAndDifficulty() {
     }
 }
 
-function saveProgress() {
-    const progress = {
-        username,
-        questionIndex: currentQuestionIndex,
-        score
-    };
-    localStorage.setItem('savedProgress', JSON.stringify(progress));
+function addQuestion() {
+    const questionText = newQuestionInput.value;
+    const hintText = newHintInput.value;
+    const category = newCategorySelect.value;
+    const difficulty = newDifficultySelect.value;
+    const answers = newAnswersInput.value.split(',').map(text => text.trim());
+    const correctAnswer = answers.shift();
+
+    if (questionText && hintText && category && difficulty && answers.length) {
+        const question = {
+            question: questionText,
+            hint: hintText,
+            answers: answers.map(answer => ({ text: answer, correct: answer === correctAnswer }))
+        };
+
+        if (!questions[category]) {
+            questions[category] = { easy: [], medium: [], hard: [] };
+        }
+        questions[category][difficulty].push(question);
+        localStorage.setItem('questions', JSON.stringify(questions));
+        alert('Question added successfully!');
+        newQuestionInput.value = '';
+        newHintInput.value = '';
+        newAnswersInput.value = '';
+    } else {
+        alert('Please fill in all fields.');
+    }
 }
 
 function calculatePerformanceMetrics() {
@@ -263,13 +286,7 @@ function calculatePerformanceMetrics() {
     accuracyElement.innerText = ((correctAnswers / totalAnswers) * 100).toFixed(2) + '%';
 }
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
+loadProfiles();
 
 function Mockgame() {
     username = usernameInput.value || 'Guest';

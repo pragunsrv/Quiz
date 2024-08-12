@@ -10,8 +10,13 @@
     <div class="container">
         <h1>Quiz Game</h1>
         <div id="profile-container">
+            <label for="profile-select">Select Profile:</label>
+            <select id="profile-select" onchange="switchProfile()">
+                <!-- Profile options will be populated dynamically -->
+            </select>
             <label for="username">Enter your name:</label>
             <input type="text" id="username" placeholder="Your name">
+            <button id="create-profile-button" class="btn" onclick="createProfile()">Create Profile</button>
             <button id="start-button" class="btn" onclick="startGame()">Start Game</button>
         </div>
         <div id="quiz-container" class="hide">
@@ -29,7 +34,9 @@
             </div>
             <p id="performance-metrics" class="hide">
                 Average Response Time: <span id="avg-response-time">0</span> seconds<br>
-                Accuracy: <span id="accuracy">0%</span>
+                Accuracy: <span id="accuracy">0%</span><br>
+                Total Questions Answered: <span id="total-questions-answered">0</span><br>
+                Average Score Per Game: <span id="avg-score">0</span>
             </p>
         </div>
         <button id="next-button" class="btn" onclick="nextQuestion()">Next</button>
@@ -37,13 +44,6 @@
         <div id="score-container" class="hide">
             <h2>Your Score: <span id="score">0</span></h2>
             <h2>High Score: <span id="high-score">0</span></h2>
-            <p>Username: <span id="profile-name">Guest</span></p>
-            <div id="review-container" class="hide">
-                <h3>Review Your Answers</h3>
-                <ul id="answer-review-list">
-                    <!-- Answer review list will be added dynamically -->
-                </ul>
-            </div>
         </div>
         <div id="leaderboard-container" class="hide">
             <h2>Leaderboard</h2>
@@ -85,6 +85,31 @@
                 <option value="45">45</option>
                 <option value="60">60</option>
             </select>
+        </div>
+        <div id="question-bank-container">
+            <h2>Add Your Own Questions</h2>
+            <label for="new-question">Question:</label>
+            <input type="text" id="new-question">
+            <label for="new-hint">Hint:</label>
+            <input type="text" id="new-hint">
+            <label for="new-category">Category:</label>
+            <select id="new-category">
+                <option value="Geography">Geography</option>
+                <option value="Literature">Literature</option>
+                <option value="Science">Science</option>
+                <option value="History">History</option>
+                <option value="Mathematics">Mathematics</option>
+                <option value="Technology">Technology</option>
+            </select>
+            <label for="new-difficulty">Difficulty:</label>
+            <select id="new-difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <label for="new-answers">Answers (comma-separated correct answer first):</label>
+            <input type="text" id="new-answers">
+            <button id="add-question-button" class="btn" onclick="addQuestion()">Add Question</button>
         </div>
     </div>
     <script src="script.js"></script>
