@@ -1,524 +1,712 @@
-
-const profileSelect = document.getElementById('profile-select');
-const usernameInput = document.getElementById('username');
-const createProfileButton = document.getElementById('create-profile-button');
-const startButton = document.getElementById('start-button');
-const quizContainer = document.getElementById('quiz-container');
-const categorySpan = document.getElementById('selected-category');
-const questionElement = document.getElementById('question');
-const hintButton = document.getElementById('hint-button');
-const hintElement = document.getElementById('hint');
-const answerButtons = document.getElementById('answer-buttons');
-const timerElement = document.getElementById('timer-count');
-const progressElement = document.getElementById('progress');
-const progressFill = document.getElementById('progress-fill');
-const scoreContainer = document.getElementById('score-container');
-const scoreElement = document.getElementById('score');
-const highScoreElement = document.getElementById('high-score');
-const leaderboardContainer = document.getElementById('leaderboard-container');
-const leaderboardList = document.getElementById('leaderboard-list');
-const categorySelect = document.getElementById('category-select');
-const difficultySelect = document.getElementById('difficulty');
-const timerLengthSelect = document.getElementById('timer-length');
-const questionBankContainer = document.getElementById('question-bank-container');
-const newQuestionInput = document.getElementById('new-question');
-const newHintInput = document.getElementById('new-hint');
-const newCategorySelect = document.getElementById('new-category');
-const newDifficultySelect = document.getElementById('new-difficulty');
-const newAnswersInput = document.getElementById('new-answers');
-const addQuestionButton = document.getElementById('add-question-button');
-const editQuestionIdInput = document.getElementById('edit-question-id');
-const editQuestionButton = document.getElementById('edit-question-button');
-const achievementsContainer = document.getElementById('achievements-container');
-const achievementsList = document.getElementById('achievements-list');
-const multiplayerContainer = document.getElementById('multiplayer-container');
-const multiplayerRoomInput = document.getElementById('multiplayer-room');
-const joinRoomButton = document.getElementById('join-room-button');
-const createRoomButton = document.getElementById('create-room-button');
-const chatContainer = document.getElementById('chat-container');
-const chatMessages = document.getElementById('chat-messages');
-const chatInput = document.getElementById('chat-input');
-const sendMessageButton = document.getElementById('send-message-button');
-const multiplayerQuestionsContainer = document.getElementById('multiplayer-questions-container');
-const multiplayerAnswerButtons = document.getElementById('multiplayer-answer-buttons');
-const multiplayerTimerElement = document.getElementById('multiplayer-timer-count');
-const multiplayerProgressElement = document.getElementById('multiplayer-progress');
-const multiplayerProgressFill = document.getElementById('multiplayer-progress-fill');
-const multiplayerScoreElement = document.getElementById('multiplayer-score-value');
-const feedbackElement = document.getElementById('feedback');
-const analyticsContainer = document.getElementById('analytics-container');
-const questionPerformanceList = document.getElementById('question-performance-list');
-
+let profiles = [];
+let currentProfile = null;
+let questions = [];
 let currentQuestionIndex = 0;
 let score = 0;
-let highScore = 0;
-let questions = [];
-let currentCategory = '';
-let currentDifficulty = '';
-let currentTimerLength = 30;
+let timer;
+let timeLeft = 30;
+let streak = 0;
+let hintsUsed = 0;
+let adaptiveDifficultyEnabled = false;
+let difficulty = "medium";
 let leaderboard = [];
-let profiles = [];
-let currentProfile = '';
-let multiplayerRoom = '';
-let multiplayerScore = 0;
-let questionPerformance = [];
-
-function loadProfiles() {
-    const profilesFromStorage = JSON.parse(localStorage.getItem('profiles')) || [];
-    profiles = profilesFromStorage;
-    profileSelect.innerHTML = profiles.map(profile => `<option value="${profile.name}">${profile.name}</option>`).join('');
-}
-
-function switchProfile() {
-    currentProfile = profileSelect.value;
-}
+let achievements = [];
+let multiplayerRoom = null;
+let multiplayerQuestions = [];
+let multiplayerCurrentQuestionIndex = 0;
+let multiplayerTimer;
+let multiplayerTimeLeft = 30;
+let multiplayerStreak = 0;
+let multiplayerHintsUsed = 0;
+let chatMessages = [];
+let chatNotificationsEnabled = false;
 
 function createProfile() {
-    const username = usernameInput.value;
+    const username = document.getElementById("username").value;
     if (username) {
-        profiles.push({ name: username, highScore: 0 });
-        localStorage.setItem('profiles', JSON.stringify(profiles));
-        loadProfiles();
-        profileSelect.value = username;
-        currentProfile = username;
+        const profile = { id: profiles.length + 1, name: username, highScore: 0 };
+        profiles.push(profile);
+        currentProfile = profile;
+        updateProfileSelect();
     }
 }
 
-function startGame() {
-    quizContainer.classList.remove('hide');
-    loadQuestions();
-    startTimer();
-}
-
-function loadQuestions() {
-    // Simulate loading questions from a question bank
-    questions = [
-        { question: 'What is the capital of France?', answers: ['Paris', 'London', 'Berlin', 'Rome'], correct: 'Paris', hint: 'It\'s known as the city of lights.' },
-        { question: 'What is 2 + 2?', answers: ['3', '4', '5', '6'], correct: '4', hint: 'It\'s an even number.' }
-    ];
-    showQuestion(questions[currentQuestionIndex]);
-}
-
-function showQuestion(questionObj) {
-    questionElement.textContent = questionObj.question;
-    hintElement.textContent = questionObj.hint;
-    answerButtons.innerHTML = questionObj.answers.map(answer => 
-        `<button class="btn" onclick="submitAnswer('${answer}')">${answer}</button>`
-    ).join('');
-    hintElement.classList.add('hide');
-    feedbackElement.classList.add('hide');
-}
-
-function showHint() {
-    hintElement.classList.remove('hide');
-}
-
-function submitAnswer(answer) {
-    const questionObj = questions[currentQuestionIndex];
-    if (answer === questionObj.correct) {
-        score += 10;
-        feedbackElement.textContent = 'Correct!';
-        updateQuestionPerformance(questionObj.question, true);
-    } else {
-        feedbackElement.textContent = `Incorrect! The correct answer was ${questionObj.correct}.`;
-        updateQuestionPerformance(questionObj.question, false);
-    }
-    feedbackElement.classList.remove('hide');
-    nextQuestion();
-}
-
-function nextQuestion() {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-        showQuestion(questions[currentQuestionIndex]);
-    } else {
-        endGame();
-    }
-}
-
-function endGame() {
-    quizContainer.classList.add('hide');
-    scoreContainer.classList.remove('hide');
-    scoreElement.textContent = score;
-    highScore = Math.max(score, highScore);
-    highScoreElement.textContent = highScore;
-    updateLeaderboard();
-    showAnalytics();
-}
-
-function updateLeaderboard() {
-    leaderboard.push({ name: currentProfile, score });
-    leaderboard.sort((a, b) => b.score - a.score);
-    leaderboardList.innerHTML = leaderboard.map(entry => 
-        `<li>${entry.name}: ${entry.score}</li>`
-    ).join('');
-}
-
-function filterLeaderboard() {
-    // Filtering logic for leaderboard
-}
-
-function changeCategory() {
-    currentCategory = categorySelect.value;
-    loadQuestions();
-}
-
-function addQuestion() {
-    const question = newQuestionInput.value;
-    const hint = newHintInput.value;
-    const category = newCategorySelect.value;
-    const difficulty = newDifficultySelect.value;
-    const answers = newAnswersInput.value.split(',').map(a => a.trim());
-    const correct = answers.shift();
-    questions.push({ question, hint, category, difficulty, answers, correct });
-    alert('Question added!');
-}
-
-function editQuestion() {
-    const id = parseInt(editQuestionIdInput.value);
-    if (id >= 0 && id < questions.length) {
-        const question = newQuestionInput.value;
-        const hint = newHintInput.value;
-        const category = newCategorySelect.value;
-        const difficulty = newDifficultySelect.value;
-        const answers = newAnswersInput.value.split(',').map(a => a.trim());
-        const correct = answers.shift();
-        questions[id] = { question, hint, category, difficulty, answers, correct };
-        alert('Question edited!');
-    }
-}
-
-function updateAchievements() {
-    // Update the achievements list
-}
-
-function createRoom() {
-    multiplayerRoom = 'ROOM' + Math.floor(Math.random() * 10000);
-    multiplayerRoomInput.value = multiplayerRoom;
-    multiplayerContainer.classList.remove('hide');
-}
-
-function joinRoom() {
-    multiplayerRoom = multiplayerRoomInput.value;
-    if (multiplayerRoom) {
-        multiplayerContainer.classList.remove('hide');
-    }
-}
-
-function sendMessage() {
-    const message = chatInput.value;
-    if (message) {
-        const messageElement = document.createElement('div');
-        messageElement.textContent = `You: ${message}`;
-        chatMessages.appendChild(messageElement);
-        chatInput.value = '';
-    }
-}
-
-function startMultiplayerGame() {
-    multiplayerQuestionsContainer.classList.remove('hide');
-    // Initialize multiplayer game state here
-}
-
-function updateMultiplayerQuestion(question, answers) {
-    document.getElementById('multiplayer-question').textContent = question;
-    const buttonsHtml = answers.map(answer => 
-        `<button class="btn" onclick="submitMultiplayerAnswer('${answer}')">${answer}</button>`
-    ).join('');
-    multiplayerAnswerButtons.innerHTML = buttonsHtml;
-}
-
-function submitMultiplayerAnswer(answer) {
-    // Handle multiplayer answer submission
-}
-
-function updateMultiplayerScore(score) {
-    multiplayerScoreElement.textContent = score;
-}
-
-function updateMultiplayerTimer(time) {
-    multiplayerTimerElement.textContent = time;
-    // Implement multiplayer timer logic
-}
-
-function updateMultiplayerProgress(questionNumber, totalQuestions) {
-    document.getElementById('multiplayer-current-question').textContent = questionNumber;
-    document.getElementById('multiplayer-total-questions').textContent = totalQuestions;
-    // Update multiplayer progress bar here
-}
-
-function updateQuestionPerformance(question, correct) {
-    const performance = {
-        question: question,
-        correct: correct,
-        timestamp: new Date().toLocaleString()
-    };
-    questionPerformance.push(performance);
-    localStorage.setItem('questionPerformance', JSON.stringify(questionPerformance));
-}
-
-function showAnalytics() {
-    analyticsContainer.classList.remove('hide');
-    const performanceData = JSON.parse(localStorage.getItem('questionPerformance')) || [];
-    questionPerformanceList.innerHTML = performanceData.map(data => 
-        `<li>${data.question}: ${data.correct ? 'Correct' : 'Incorrect'} (${data.timestamp})</li>`
-    ).join('');
-}
-
-// Initialize game
-loadProfiles();
-
-
-
-function loadProfiles() {
-    const profilesFromStorage = JSON.parse(localStorage.getItem('profiles')) || [];
-    profiles = profilesFromStorage;
-    profileSelect.innerHTML = profiles.map(profile => `<option value="${profile.name}">${profile.name}</option>`).join('');
-}
-
-function switchProfile() {
-    currentProfile = profileSelect.value;
-}
-
-function createProfile() {
-    const username = usernameInput.value;
-    if (username) {
-        profiles.push({ name: username, highScore: 0 });
-        localStorage.setItem('profiles', JSON.stringify(profiles));
-        loadProfiles();
-        profileSelect.value = username;
-        currentProfile = username;
-    }
-}
-
-function startGame() {
-    quizContainer.classList.remove('hide');
-    loadQuestions();
-    startTimer();
-}
-
-function loadQuestions() {
-    // Simulate loading questions from a question bank
-    questions = [
-        { question: 'What is the capital of France?', answers: ['Paris', 'London', 'Berlin', 'Rome'], correct: 'Paris', hint: 'It\'s known as the city of lights.' },
-        { question: 'What is 2 + 2?', answers: ['3', '4', '5', '6'], correct: '4', hint: 'It\'s an even number.' }
-    ];
-    showQuestion(questions[currentQuestionIndex]);
-}
-
-function showQuestion(questionObj) {
-    questionElement.textContent = questionObj.question;
-    hintElement.textContent = questionObj.hint;
-    answerButtons.innerHTML = questionObj.answers.map(answer => 
-        `<button class="btn" onclick="submitAnswer('${answer}')">${answer}</button>`
-    ).join('');
-    hintElement.classList.add('hide');
-}
-
-function showHint() {
-    hintElement.classList.remove('hide');
-}
-
-function submitAnswer(answer) {
-    const questionObj = questions[currentQuestionIndex];
-    if (answer === questionObj.correct) {
-        score += 10;
-    }
-    nextQuestion();
-}
-
-function nextQuestion() {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-        showQuestion(questions[currentQuestionIndex]);
-    } else {
-        endGame();
-    }
-}
-
-function endGame() {
-    quizContainer.classList.add('hide');
-    scoreContainer.classList.remove('hide');
-    scoreElement.textContent = score;
-    highScore = Math.max(score, highScore);
-    highScoreElement.textContent = highScore;
-    updateLeaderboard();
-}
-
-function updateLeaderboard() {
-    leaderboard.push({ name: currentProfile, score });
-    leaderboard.sort((a, b) => b.score - a.score);
-    leaderboardList.innerHTML = leaderboard.map(entry => 
-        `<li>${entry.name}: ${entry.score}</li>`
-    ).join('');
-}
-
-function filterLeaderboard() {
-    // Filtering logic for leaderboard
-}
-
-function changeCategory() {
-    currentCategory = categorySelect.value;
-    loadQuestions();
-}
-
-function addQuestion() {
-    const question = newQuestionInput.value;
-    const hint = newHintInput.value;
-    const category = newCategorySelect.value;
-    const difficulty = newDifficultySelect.value;
-    const answers = newAnswersInput.value.split(',').map(a => a.trim());
-    const correct = answers.shift();
-    questions.push({ question, hint, category, difficulty, answers, correct });
-    alert('Question added!');
-}
-
-function editQuestion() {
-    const id = parseInt(editQuestionIdInput.value);
-    if (id >= 0 && id < questions.length) {
-        const question = newQuestionInput.value;
-        const hint = newHintInput.value;
-        const category = newCategorySelect.value;
-        const difficulty = newDifficultySelect.value;
-        const answers = newAnswersInput.value.split(',').map(a => a.trim());
-        const correct = answers.shift();
-        questions[id] = { question, hint, category, difficulty, answers, correct };
-        alert('Question edited!');
-    }
-}
-
-function updateAchievements() {
-    // Update the achievements list
-}
-
-function createRoom() {
-    multiplayerRoom = 'ROOM' + Math.floor(Math.random() * 10000);
-    multiplayerRoomInput.value = multiplayerRoom;
-    multiplayerContainer.classList.remove('hide');
-}
-
-function joinRoom() {
-    multiplayerRoom = multiplayerRoomInput.value;
-    if (multiplayerRoom) {
-        multiplayerContainer.classList.remove('hide');
-    }
-}
-
-function sendMessage() {
-    const message = chatInput.value;
-    if (message) {
-        const messageElement = document.createElement('div');
-        messageElement.textContent = `You: ${message}`;
-        chatMessages.appendChild(messageElement);
-        chatInput.value = '';
-    }
-}
-
-function startMultiplayerGame() {
-    multiplayerQuestionsContainer.classList.remove('hide');
-    // Initialize multiplayer game state here
-}
-
-function updateMultiplayerQuestion(question, answers) {
-    document.getElementById('multiplayer-question').textContent = question;
-    const buttonsHtml = answers.map(answer => 
-        `<button class="btn" onclick="submitMultiplayerAnswer('${answer}')">${answer}</button>`
-    ).join('');
-    multiplayerAnswerButtons.innerHTML = buttonsHtml;
-}
-
-function submitMultiplayerAnswer(answer) {
-    // Handle multiplayer answer submission
-}
-
-function updateMultiplayerScore(score) {
-    multiplayerScoreElement.textContent = score;
-}
-
-function updateMultiplayerTimer(time) {
-    multiplayerTimerElement.textContent = time;
-    // Implement multiplayer timer logic
-}
-
-function updateMultiplayerProgress(questionNumber, totalQuestions) {
-    document.getElementById('multiplayer-current-question').textContent = questionNumber;
-    document.getElementById('multiplayer-total-questions').textContent = totalQuestions;
-    // Update multiplayer progress bar here
-}
-
-// Initialize game
-loadProfiles();
-
-function Mockgame() {
-    username = usernameInput.value || 'Guest';
-    profileNameElement.innerText = username;
-
-    currentQuestionIndex = 0;
-    score = 0;
-    scoreElement.innerText = score;
-    highScoreElement.innerText = highScore;
-
-    currentDifficulty = difficultySelect.value;
-    const questionsArray = shuffleArray(questions[currentDifficulty]);
-    totalQuestionsElement.innerText = questionsArray.length;
-
-    nextButton.classList.add('hide');
-    reviewButton.classList.add('hide');
-    scoreContainer.classList.add('hide');
-    reviewContainer.classList.add('hide');
-    leaderboardContainer.classList.add('hide');
-    profileContainer.classList.add('hide');
-    questionContainer.classList.remove('hide');
-    hintElement.classList.add('hide');
-
-    answerHistory = [];
-    showQuestion(questionsArray[currentQuestionIndex]);
-}
-
-function showQuest(question) {
-    categoryElement.innerText = `Category: ${question.category}`;
-    questionContainer.querySelector('#question').innerText = question.question;
-    hintElement.innerText = question.hint;
-    answerButtons.innerHTML = '';
-    question.answers.forEach(answer => {
-        const button = document.createElement('button');
-        button.innerText = answer.text;
-        button.classList.add('btn');
-        button.addEventListener('click', () => selectAnswer(answer));
-        answerButtons.appendChild(button);
+function updateProfileSelect() {
+    const select = document.getElementById("profile-select");
+    select.innerHTML = "";
+    profiles.forEach(profile => {
+        const option = document.createElement("option");
+        option.value = profile.id;
+        option.textContent = profile.name;
+        select.appendChild(option);
     });
-    startTimer();
-    currentQuestionElement.innerText = currentQuestionIndex + 1;
-    updateProgressBar();
 }
-function endTimer() {
-    timeLeft = parseInt(timerLengthSelect.value, 10);
-    timerCount.innerText = timeLeft;
+
+function startGame() {
+    if (!currentProfile) {
+        alert("Please select or create a profile to start the game.");
+        return;
+    }
+    document.getElementById("profile-container").classList.add("hide");
+    document.getElementById("quiz-container").classList.remove("hide");
+    selectCategory();
+    loadQuestion();
+    startTimer();
+}
+
+function selectCategory() {
+    const categories = ["General", "Math", "Science", "History"];
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+    document.getElementById("selected-category").textContent = randomCategory;
+}
+
+function loadQuestion() {
+    if (currentQuestionIndex >= questions.length) {
+        endGame();
+        return;
+    }
+    const question = questions[currentQuestionIndex];
+    document.getElementById("question").textContent = question.text;
+    document.getElementById("hint").textContent = question.hint;
+    updateAnswerButtons(question.answers);
+}
+
+function updateAnswerButtons(answers) {
+    const buttonsContainer = document.getElementById("answer-buttons");
+    buttonsContainer.innerHTML = "";
+    answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.textContent = answer.text;
+        button.onclick = () => checkAnswer(answer.isCorrect);
+        buttonsContainer.appendChild(button);
+    });
+}
+
+function checkAnswer(isCorrect) {
+    if (isCorrect) {
+        score++;
+        streak++;
+        updateProgress();
+    } else {
+        streak = 0;
+        updateProgress();
+    }
+    currentQuestionIndex++;
+    loadQuestion();
+}
+
+function updateProgress() {
+    const progressFill = document.getElementById("progress-fill");
+    const progressPercent = (currentQuestionIndex / questions.length) * 100;
+    progressFill.style.width = `${progressPercent}%`;
+
+    document.getElementById("streak").textContent = `Streak: ${streak}`;
+}
+
+function startTimer() {
+    timeLeft = 30;
     timer = setInterval(() => {
         timeLeft--;
-        timerCount.innerText = timeLeft;
+        document.getElementById("timer-count").textContent = timeLeft;
         if (timeLeft <= 0) {
             clearInterval(timer);
-            selectAnswer({ correct: false }); // Time's up, mark as incorrect
+            endGame();
         }
     }, 1000);
 }
 
-function swgrateProgressBar() {
-    const progress = (currentQuestionIndex / (totalQuestionsElement.innerText - 1)) * 100;
-    progressFill.style.width = `${progress}%`;
+function endGame() {
+    clearInterval(timer);
+    document.getElementById("quiz-container").classList.add("hide");
+    document.getElementById("score-container").classList.remove("hide");
+    document.getElementById("score").textContent = score;
+    updateHighScore();
 }
 
-function shownone() {
-    hintElement.classList.remove('hide');
+function updateHighScore() {
+    if (score > currentProfile.highScore) {
+        currentProfile.highScore = score;
+        updateProfileSelect();
+    }
+    document.getElementById("high-score").textContent = currentProfile.highScore;
 }
 
-function WrongAnswers() {
-    reviewContainer.classList.remove('hide');
-    answerReviewList.innerHTML = '';
-    answerHistory.forEach(answer => {
-        const listItem = document.createElement('li');
-        listItem.innerText = `${answer.question} - Your Answer: ${answer.selectedAnswer} - ${answer.correct ? 'Correct' : 'Incorrect'}`;
-        answerReviewList.appendChild(listItem);
+function restartGame() {
+    score = 0;
+    currentQuestionIndex = 0;
+    document.getElementById("score-container").classList.add("hide");
+    document.getElementById("quiz-container").classList.remove("hide");
+    loadQuestion();
+    startTimer();
+}
+
+function saveScore() {
+    leaderboard.push({ profile: currentProfile.name, score });
+    updateLeaderboard();
+}
+
+function updateLeaderboard() {
+    const leaderboardList = document.getElementById("leaderboard-list");
+    leaderboardList.innerHTML = "";
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard.forEach(entry => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `${entry.profile}: ${entry.score}`;
+        leaderboardList.appendChild(listItem);
     });
+}
+
+function addQuestion() {
+    const newQuestionText = document.getElementById("new-question").value;
+    const newHint = document.getElementById("new-hint").value;
+    const newCategory = document.getElementById("new-category").value;
+    const newDifficulty = document.getElementById("new-difficulty").value;
+    const newAnswersText = document.getElementById("new-answers").value;
+    const newAnswersArray = newAnswersText.split(",").map((text, index) => ({
+        text: text.trim(),
+        isCorrect: index === 0
+    }));
+    const newQuestion = {
+        id: questions.length + 1,
+        text: newQuestionText,
+        hint: newHint,
+        category: newCategory,
+        difficulty: newDifficulty,
+        answers: newAnswersArray
+    };
+    questions.push(newQuestion);
+    updateQuestionBank();
+}
+
+function updateQuestionBank() {
+    const questionBankList = document.getElementById("question-performance-list");
+    questionBankList.innerHTML = "";
+    questions.forEach(question => {
+        const listItem = document.createElement("li");
+        listItem.textContent = `Q${question.id}: ${question.text} (${question.difficulty})`;
+        questionBankList.appendChild(listItem);
+    });
+}
+
+function editQuestion() {
+    const questionIdToEdit = parseInt(document.getElementById("edit-question-id").value);
+    const questionToEdit = questions.find(q => q.id === questionIdToEdit);
+    if (questionToEdit) {
+        const newQuestionText = document.getElementById("new-question").value;
+        const newHint = document.getElementById("new-hint").value;
+        const newCategory = document.getElementById("new-category").value;
+        const newDifficulty = document.getElementById("new-difficulty").value;
+        const newAnswersText = document.getElementById("new-answers").value;
+        const newAnswersArray = newAnswersText.split(",").map((text, index) => ({
+            text: text.trim(),
+            isCorrect: index === 0
+        }));
+        questionToEdit.text = newQuestionText || questionToEdit.text;
+        questionToEdit.hint = newHint || questionToEdit.hint;
+        questionToEdit.category = newCategory || questionToEdit.category;
+        questionToEdit.difficulty = newDifficulty || questionToEdit.difficulty;
+        questionToEdit.answers = newAnswersArray.length > 0 ? newAnswersArray : questionToEdit.answers;
+        updateQuestionBank();
+    } else {
+        alert("Question not found.");
+    }
+}
+
+function showHint() {
+    document.getElementById("hint").classList.remove("hide");
+    hintsUsed++;
+    document.getElementById("hint-usage").textContent = `Hints used: ${hintsUsed}`;
+}
+
+function applyTheme(theme) {
+    document.body.className = `${theme}-theme`;
+}
+
+function toggleRandomizeQuestions() {
+    const randomizeQuestions = document.getElementById("randomize-questions").checked;
+    if (randomizeQuestions) {
+        questions.sort(() => Math.random() - 0.5);
+    } else {
+        questions.sort((a, b) => a.id - b.id);
+    }
+}
+
+function toggleTimer() {
+    const timerToggle = document.getElementById("timer-toggle").checked;
+    document.getElementById("timer-container").style.display = timerToggle ? "block" : "none";
+}
+
+function toggleHints() {
+    const hintToggle = document.getElementById("hint-toggle").checked;
+    document.getElementById("hint-button").style.display = hintToggle ? "block" : "none";
+}
+
+function toggleAdaptiveDifficulty() {
+    adaptiveDifficultyEnabled = document.getElementById("adaptive-difficulty-toggle").checked;
+    document.getElementById("adaptive-difficulty").textContent = `Difficulty: ${adaptiveDifficultyEnabled ? difficulty : "Medium"}`;
+}
+
+function joinRoom() {
+    const roomName = document.getElementById("multiplayer-room").value;
+    if (roomName) {
+        multiplayerRoom = roomName;
+        document.getElementById("multiplayer-container").classList.add("hide");
+        document.getElementById("quiz-container").classList.remove("hide");
+        startMultiplayerGame();
+    }
+}
+
+function createRoom() {
+    multiplayerRoom = `Room-${Math.floor(Math.random() * 1000)}`;
+    document.getElementById("multiplayer-room").value = multiplayerRoom;
+    document.getElementById("multiplayer-container").classList.add("hide");
+    document.getElementById("quiz-container").classList.remove("hide");
+    startMultiplayerGame();
+}
+
+function startMultiplayerGame() {
+    selectCategory();
+    multiplayerCurrentQuestionIndex = 0;
+    loadMultiplayerQuestion();
+    startMultiplayerTimer();
+}
+
+function loadMultiplayerQuestion() {
+    if (multiplayerCurrentQuestionIndex >= multiplayerQuestions.length) {
+        endMultiplayerGame();
+        return;
+    }
+    const question = multiplayerQuestions[multiplayerCurrentQuestionIndex];
+    document.getElementById("question").textContent = question.text;
+    updateMultiplayerAnswerButtons(question.answers);
+}
+
+function updateMultiplayerAnswerButtons(answers) {
+    const buttonsContainer = document.getElementById("multiplayer-answer-buttons");
+    buttonsContainer.innerHTML = "";
+    answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.textContent = answer.text;
+        button.onclick = () => checkMultiplayerAnswer(answer.isCorrect);
+        buttonsContainer.appendChild(button);
+    });
+}
+
+function checkMultiplayerAnswer(isCorrect) {
+    if (isCorrect) {
+        multiplayerStreak++;
+    } else {
+        multiplayerStreak = 0;
+    }
+    updateMultiplayerProgress();
+    multiplayerCurrentQuestionIndex++;
+    loadMultiplayerQuestion();
+}
+
+function updateMultiplayerProgress() {
+    const progressFill = document.getElementById("multiplayer-progress-fill");
+    const progressPercent = (multiplayerCurrentQuestionIndex / multiplayerQuestions.length) * 100;
+    progressFill.style.width = `${progressPercent}%`;
+    document.getElementById("streak").textContent = `Streak: ${multiplayerStreak}`;
+}
+
+function startMultiplayerTimer() {
+    multiplayerTimeLeft = 30;
+    multiplayerTimer = setInterval(() => {
+        multiplayerTimeLeft--;
+        document.getElementById("multiplayer-timer-count").textContent = multiplayerTimeLeft;
+        if (multiplayerTimeLeft <= 0) {
+            clearInterval(multiplayerTimer);
+            endMultiplayerGame();
+        }
+    }, 1000);
+}
+
+function endMultiplayerGame() {
+    clearInterval(multiplayerTimer);
+    document.getElementById("quiz-container").classList.add("hide");
+    document.getElementById("score-container").classList.remove("hide");
+    document.getElementById("score").textContent = multiplayerStreak;
+}
+
+function sendMessage() {
+    const message = document.getElementById("chat-input").value;
+    if (message) {
+        chatMessages.push(message);
+        updateChat();
+        document.getElementById("chat-input").value = "";
+        if (chatNotificationsEnabled) {
+            document.getElementById("chat-notifications").textContent = "New message received!";
+        }
+    }
+}
+
+function updateChat() {
+    const chatMessagesContainer = document.getElementById("chat-messages");
+    chatMessagesContainer.innerHTML = "";
+    chatMessages.forEach(msg => {
+        const messageElement = document.createElement("p");
+        messageElement.textContent = msg;
+        chatMessagesContainer.appendChild(messageElement);
+    });
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+document.getElementById("multiplayer-chat-toggle").addEventListener("change", (event) => {
+    chatNotificationsEnabled = event.target.checked;
+});
+
+function calculateAverageAnswerTime() {
+    let totalTime = 0;
+    questions.forEach(question => {
+        totalTime += question.timeSpent;
+    });
+    return totalTime / questions.length;
+}
+
+function showAnswerDistribution() {
+    const correctAnswers = questions.filter(q => q.isCorrect).length;
+    const incorrectAnswers = questions.length - correctAnswers;
+    alert(`Correct Answers: ${correctAnswers}\nIncorrect Answers: ${incorrectAnswers}`);
+}
+
+function saveUserSettings() {
+    localStorage.setItem("quizSettings", JSON.stringify({
+        randomizeQuestions: document.getElementById("randomize-questions").checked,
+        timerToggle: document.getElementById("timer-toggle").checked,
+        hintToggle: document.getElementById("hint-toggle").checked,
+        adaptiveDifficultyToggle: document.getElementById("adaptive-difficulty-toggle").checked
+    }));
+}
+
+function loadUserSettings() {
+    const settings = JSON.parse(localStorage.getItem("quizSettings"));
+    if (settings) {
+        document.getElementById("randomize-questions").checked = settings.randomizeQuestions;
+        document.getElementById("timer-toggle").checked = settings.timerToggle;
+        document.getElementById("hint-toggle").checked = settings.hintToggle;
+        document.getElementById("adaptive-difficulty-toggle").checked = settings.adaptiveDifficultyToggle;
+    }
+}
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+function clearProfileData() {
+    profiles = [];
+    currentProfile = null;
+    document.getElementById("profile-select").innerHTML = "";
+}
+
+function resetSettings() {
+    localStorage.removeItem("quizSettings");
+    document.getElementById("randomize-questions").checked = false;
+    document.getElementById("timer-toggle").checked = true;
+    document.getElementById("hint-toggle").checked = true;
+    document.getElementById("adaptive-difficulty-toggle").checked = false;
+}
+
+function handleKeyboardShortcuts(event) {
+    if (event.key === "F1") {
+        toggleHints();
+    } else if (event.key === "F2") {
+        toggleTimer();
+    } else if (event.key === "F3") {
+        toggleAdaptiveDifficulty();
+    }
+}
+
+function activateBonusRound() {
+    if (score >= 10) {
+        document.getElementById("bonus-round").classList.remove("hide");
+        document.getElementById("quiz-container").classList.add("hide");
+        loadBonusQuestion();
+    }
+}
+
+function loadBonusQuestion() {
+    const bonusQuestion = questions[Math.floor(Math.random() * questions.length)];
+    document.getElementById("bonus-question").textContent = bonusQuestion.text;
+    updateBonusAnswerButtons(bonusQuestion.answers);
+}
+
+function updateBonusAnswerButtons(answers) {
+    const buttonsContainer = document.getElementById("bonus-answer-buttons");
+    buttonsContainer.innerHTML = "";
+    answers.forEach(answer => {
+        const button = document.createElement("button");
+        button.textContent = answer.text;
+        button.onclick = () => checkBonusAnswer(answer.isCorrect);
+        buttonsContainer.appendChild(button);
+    });
+}
+
+function checkBonusAnswer(isCorrect) {
+    if (isCorrect) {
+        score += 3;
+    } else {
+        score--;
+    }
+    document.getElementById("bonus-round").classList.add("hide");
+    document.getElementById("quiz-container").classList.remove("hide");
+    loadQuestion();
+}
+
+function adjustDifficultyBasedOnPerformance() {
+    const correctAnswers = questions.filter(q => q.isCorrect).length;
+    if (correctAnswers >= questions.length * 0.8) {
+        difficulty = "hard";
+    } else if (correctAnswers >= questions.length * 0.5) {
+        difficulty = "medium";
+    } else {
+        difficulty = "easy";
+    }
+    document.getElementById("difficulty-level").textContent = `Difficulty: ${difficulty}`;
+}
+
+function checkForAchievements() {
+    if (streak >= 10 && !achievements.includes("Streak Master")) {
+        achievements.push("Streak Master");
+        alert("Achievement Unlocked: Streak Master");
+    }
+    if (hintsUsed <= 3 && !achievements.includes("Hint Saver")) {
+        achievements.push("Hint Saver");
+        alert("Achievement Unlocked: Hint Saver");
+    }
+    if (score >= 50 && !achievements.includes("Quiz Champion")) {
+        achievements.push("Quiz Champion");
+        alert("Achievement Unlocked: Quiz Champion");
+    }
+}
+
+function checkMultiplayerAnswer(isCorrect) {
+    if (isCorrect) {
+        multiplayerStreak++;
+    } else {
+        multiplayerStreak = 0;
+    }
+    updateMultiplayerProgress();
+    multiplayerCurrentQuestionIndex++;
+    loadMultiplayerQuestion();
+}
+
+function updateMultiplayerProgress() {
+    const progressFill = document.getElementById("multiplayer-progress-fill");
+    const progressPercent = (multiplayerCurrentQuestionIndex / multiplayerQuestions.length) * 100;
+    progressFill.style.width = `${progressPercent}%`;
+    document.getElementById("streak").textContent = `Streak: ${multiplayerStreak}`;
+}
+
+function startMultiplayerTimer() {
+    multiplayerTimeLeft = 30;
+    multiplayerTimer = setInterval(() => {
+        multiplayerTimeLeft--;
+        document.getElementById("multiplayer-timer-count").textContent = multiplayerTimeLeft;
+        if (multiplayerTimeLeft <= 0) {
+            clearInterval(multiplayerTimer);
+            endMultiplayerGame();
+        }
+    }, 1000);
+}
+
+function endMultiplayerGame() {
+    clearInterval(multiplayerTimer);
+    document.getElementById("quiz-container").classList.add("hide");
+    document.getElementById("score-container").classList.remove("hide");
+    document.getElementById("score").textContent = multiplayerStreak;
+}
+
+function sendMessage() {
+    const message = document.getElementById("chat-input").value;
+    if (message) {
+        chatMessages.push(message);
+        updateChat();
+        document.getElementById("chat-input").value = "";
+        if (chatNotificationsEnabled) {
+            document.getElementById("chat-notifications").textContent = "New message received!";
+        }
+    }
+}
+
+function updateChat() {
+    const chatMessagesContainer = document.getElementById("chat-messages");
+    chatMessagesContainer.innerHTML = "";
+    chatMessages.forEach(msg => {
+        const messageElement = document.createElement("p");
+        messageElement.textContent = msg;
+        chatMessagesContainer.appendChild(messageElement);
+    });
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+document.getElementById("multiplayer-chat-toggle").addEventListener("change", (event) => {
+    chatNotificationsEnabled = event.target.checked;
+});
+
+function calculateAverageAnswerTime() {
+    let totalTime = 0;
+    questions.forEach(question => {
+        totalTime += question.timeSpent;
+    });
+    return totalTime / questions.length;
+}
+
+function showAnswerDistribution() {
+    const correctAnswers = questions.filter(q => q.isCorrect).length;
+    const incorrectAnswers = questions.length - correctAnswers;
+    alert(`Correct Answers: ${correctAnswers}\nIncorrect Answers: ${incorrectAnswers}`);
+}
+
+function saveUserSettings() {
+    localStorage.setItem("quizSettings", JSON.stringify({
+        randomizeQuestions: document.getElementById("randomize-questions").checked,
+        timerToggle: document.getElementById("timer-toggle").checked,
+        hintToggle: document.getElementById("hint-toggle").checked,
+        adaptiveDifficultyToggle: document.getElementById("adaptive-difficulty-toggle").checked
+    }));
+}
+
+function loadUserSettings() {
+    const settings = JSON.parse(localStorage.getItem("quizSettings"));
+    if (settings) {
+        document.getElementById("randomize-questions").checked = settings.randomizeQuestions;
+        document.getElementById("timer-toggle").checked = settings.timerToggle;
+        document.getElementById("hint-toggle").checked = settings.hintToggle;
+        document.getElementById("adaptive-difficulty-toggle").checked = settings.adaptiveDifficultyToggle;
+    }
+}
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+function clearProfileData() {
+    profiles = [];
+    currentProfile = null;
+    document.getElementById("profile-select").innerHTML = "";
+}
+function checkMultiplayerAnswer(isCorrect) {
+    if (isCorrect) {
+        multiplayerStreak++;
+    } else {
+        multiplayerStreak = 0;
+    }
+    updateMultiplayerProgress();
+    multiplayerCurrentQuestionIndex++;
+    loadMultiplayerQuestion();
+}
+
+function updateMultiplayerProgress() {
+    const progressFill = document.getElementById("multiplayer-progress-fill");
+    const progressPercent = (multiplayerCurrentQuestionIndex / multiplayerQuestions.length) * 100;
+    progressFill.style.width = `${progressPercent}%`;
+    document.getElementById("streak").textContent = `Streak: ${multiplayerStreak}`;
+}
+
+function startMultiplayerTimer() {
+    multiplayerTimeLeft = 30;
+    multiplayerTimer = setInterval(() => {
+        multiplayerTimeLeft--;
+        document.getElementById("multiplayer-timer-count").textContent = multiplayerTimeLeft;
+        if (multiplayerTimeLeft <= 0) {
+            clearInterval(multiplayerTimer);
+            endMultiplayerGame();
+        }
+    }, 1000);
+}
+
+function endMultiplayerGame() {
+    clearInterval(multiplayerTimer);
+    document.getElementById("quiz-container").classList.add("hide");
+    document.getElementById("score-container").classList.remove("hide");
+    document.getElementById("score").textContent = multiplayerStreak;
+}
+
+function sendMessage() {
+    const message = document.getElementById("chat-input").value;
+    if (message) {
+        chatMessages.push(message);
+        updateChat();
+        document.getElementById("chat-input").value = "";
+        if (chatNotificationsEnabled) {
+            document.getElementById("chat-notifications").textContent = "New message received!";
+        }
+    }
+}
+
+function updateChat() {
+    const chatMessagesContainer = document.getElementById("chat-messages");
+    chatMessagesContainer.innerHTML = "";
+    chatMessages.forEach(msg => {
+        const messageElement = document.createElement("p");
+        messageElement.textContent = msg;
+        chatMessagesContainer.appendChild(messageElement);
+    });
+    chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight;
+}
+
+document.getElementById("multiplayer-chat-toggle").addEventListener("change", (event) => {
+    chatNotificationsEnabled = event.target.checked;
+});
+
+function calculateAverageAnswerTime() {
+    let totalTime = 0;
+    questions.forEach(question => {
+        totalTime += question.timeSpent;
+    });
+    return totalTime / questions.length;
+}
+
+function showAnswerDistribution() {
+    const correctAnswers = questions.filter(q => q.isCorrect).length;
+    const incorrectAnswers = questions.length - correctAnswers;
+    alert(`Correct Answers: ${correctAnswers}\nIncorrect Answers: ${incorrectAnswers}`);
+}
+
+function saveUserSettings() {
+    localStorage.setItem("quizSettings", JSON.stringify({
+        randomizeQuestions: document.getElementById("randomize-questions").checked,
+        timerToggle: document.getElementById("timer-toggle").checked,
+        hintToggle: document.getElementById("hint-toggle").checked,
+        adaptiveDifficultyToggle: document.getElementById("adaptive-difficulty-toggle").checked
+    }));
+}
+
+function loadUserSettings() {
+    const settings = JSON.parse(localStorage.getItem("quizSettings"));
+    if (settings) {
+        document.getElementById("randomize-questions").checked = settings.randomizeQuestions;
+        document.getElementById("timer-toggle").checked = settings.timerToggle;
+        document.getElementById("hint-toggle").checked = settings.hintToggle;
+        document.getElementById("adaptive-difficulty-toggle").checked = settings.adaptiveDifficultyToggle;
+    }
+}
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+
+function clearProfileData() {
+    profiles = [];
+    currentProfile = null;
+    document.getElementById("profile-select").innerHTML = "";
 }

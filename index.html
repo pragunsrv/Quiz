@@ -7,151 +7,84 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <div id="profile-container">
         <h1>Quiz Game</h1>
-        <div id="profile-container">
-            <label for="profile-select">Select Profile:</label>
-            <select id="profile-select" onchange="switchProfile()">
-                <!-- Profile options will be populated dynamically -->
-            </select>
-            <label for="username">Enter your name:</label>
-            <input type="text" id="username" placeholder="Your name">
-            <button id="create-profile-button" class="btn" onclick="createProfile()">Create Profile</button>
-            <button id="start-button" class="btn" onclick="startGame()">Start Game</button>
+        <input type="text" id="username" placeholder="Enter your name">
+        <button onclick="createProfile()">Create Profile</button>
+        <select id="profile-select"></select>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div id="quiz-container" class="hide">
+        <h2 id="selected-category">Category</h2>
+        <div id="question-container">
+            <p id="question">Question text will appear here</p>
+            <p id="hint" class="hide">Hint text will appear here</p>
+            <div id="answer-buttons"></div>
         </div>
-        <div id="quiz-container" class="hide">
-            <p id="category">Category: <span id="selected-category">All</span></p>
-            <p id="question"></p>
-            <button id="hint-button" class="btn" onclick="showHint()">Get Hint</button>
-            <p id="hint" class="hide"></p>
-            <div id="answer-buttons" class="btn-container">
-                <!-- Buttons will be added dynamically -->
-            </div>
-            <p id="timer">Time left: <span id="timer-count">30</span> seconds</p>
-            <p id="progress">Question <span id="current-question">1</span> of <span id="total-questions">2</span></p>
-            <div id="progress-bar">
-                <div id="progress-fill"></div>
-            </div>
-            <p id="performance-metrics" class="hide">
-                Average Response Time: <span id="avg-response-time">0</span> seconds<br>
-                Accuracy: <span id="accuracy">0%</span><br>
-                Total Questions Answered: <span id="total-questions-answered">0</span><br>
-                Average Score Per Game: <span id="avg-score">0</span>
-            </p>
+        <div id="progress">
+            <div id="progress-fill"></div>
         </div>
-        <button id="next-button" class="btn" onclick="nextQuestion()">Next</button>
-        <button id="review-button" class="btn hide" onclick="reviewAnswers()">Review Answers</button>
-        <div id="score-container" class="hide">
-            <h2>Your Score: <span id="score">0</span></h2>
-            <h2>High Score: <span id="high-score">0</span></h2>
-        </div>
-        <div id="leaderboard-container" class="hide">
-            <h2>Leaderboard</h2>
-            <label for="difficulty-filter">Filter by Difficulty:</label>
-            <select id="difficulty-filter" onchange="filterLeaderboard()">
-                <option value="">All</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
-            <label for="mode-filter">Filter by Mode:</label>
-            <select id="mode-filter" onchange="filterLeaderboard()">
-                <option value="">All</option>
-                <option value="single">Single Player</option>
-                <option value="multiplayer">Multiplayer</option>
-            </select>
-            <ul id="leaderboard-list">
-                <!-- Leaderboard will be added dynamically -->
-            </ul>
-        </div>
-        <div id="category-container">
-            <label for="category-select">Select Category:</label>
-            <select id="category-select" onchange="changeCategory()">
-                <option value="">All</option>
-                <option value="Geography">Geography</option>
-                <option value="Literature">Literature</option>
-                <option value="Science">Science</option>
-                <option value="History">History</option>
-                <option value="Mathematics">Mathematics</option>
-                <option value="Technology">Technology</option>
-            </select>
-        </div>
-        <div id="difficulty-container">
-            <label for="difficulty">Select Difficulty:</label>
-            <select id="difficulty">
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
-        </div>
-        <div id="timer-settings">
-            <label for="timer-length">Select Timer Length (seconds):</label>
-            <select id="timer-length">
-                <option value="30">30</option>
-                <option value="45">45</option>
-                <option value="60">60</option>
-            </select>
-        </div>
-        <div id="question-bank-container">
-            <h2>Add or Edit Questions</h2>
-            <label for="new-question">Question:</label>
-            <input type="text" id="new-question">
-            <label for="new-hint">Hint:</label>
-            <input type="text" id="new-hint">
-            <label for="new-category">Category:</label>
-            <select id="new-category">
-                <option value="Geography">Geography</option>
-                <option value="Literature">Literature</option>
-                <option value="Science">Science</option>
-                <option value="History">History</option>
-                <option value="Mathematics">Mathematics</option>
-                <option value="Technology">Technology</option>
-            </select>
-            <label for="new-difficulty">Difficulty:</label>
-            <select id="new-difficulty">
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
-            <label for="new-answers">Answers (comma-separated correct answer first):</label>
-            <input type="text" id="new-answers">
-            <button id="add-question-button" class="btn" onclick="addQuestion()">Add Question</button>
-            <label for="edit-question-id">Edit Question ID:</label>
-            <input type="number" id="edit-question-id">
-            <button id="edit-question-button" class="btn" onclick="editQuestion()">Edit Question</button>
-        </div>
-        <div id="achievements-container" class="hide">
-            <h2>Achievements</h2>
-            <ul id="achievements-list">
-                <!-- Achievements will be added dynamically -->
-            </ul>
-        </div>
-        <div id="multiplayer-container" class="hide">
-            <h2>Multiplayer Mode</h2>
-            <label for="multiplayer-room">Enter Room Code:</label>
-            <input type="text" id="multiplayer-room" placeholder="Room Code">
-            <button id="join-room-button" class="btn" onclick="joinRoom()">Join Room</button>
-            <button id="create-room-button" class="btn" onclick="createRoom()">Create Room</button>
-            <div id="chat-container" class="hide">
-                <h3>Chat</h3>
-                <div id="chat-messages"></div>
-                <input type="text" id="chat-input" placeholder="Type a message">
-                <button id="send-message-button" class="btn" onclick="sendMessage()">Send</button>
-            </div>
-            <div id="multiplayer-questions-container" class="hide">
-                <p id="multiplayer-question"></p>
-                <div id="multiplayer-answer-buttons" class="btn-container">
-                    <!-- Buttons will be added dynamically -->
-                </div>
-                <p id="multiplayer-timer">Time left: <span id="multiplayer-timer-count">30</span> seconds</p>
-                <p id="multiplayer-progress">Question <span id="multiplayer-current-question">1</span> of <span id="multiplayer-total-questions">2</span></p>
-                <div id="multiplayer-progress-bar">
-                    <div id="multiplayer-progress-fill"></div>
-                </div>
-                <p id="multiplayer-score">Your Score: <span id="multiplayer-score-value">0</span></p>
-            </div>
+        <p id="streak">Streak: 0</p>
+        <p id="timer-container">Time Left: <span id="timer-count">30</span> seconds</p>
+        <button id="hint-button" onclick="showHint()">Show Hint</button>
+        <button onclick="restartGame()">Restart Game</button>
+    </div>
+
+    <div id="score-container" class="hide">
+        <h2>Game Over</h2>
+        <p id="score">Your Score: 0</p>
+        <button onclick="saveScore()">Save Score</button>
+        <button onclick="clearProfileData()">Clear Profile Data</button>
+        <button onclick="resetSettings()">Reset Settings</button>
+        <button onclick="toggleFullScreen()">Toggle Full Screen</button>
+        <button onclick="activateBonusRound()">Activate Bonus Round</button>
+    </div>
+
+    <div id="bonus-round" class="hide">
+        <h2>Bonus Round</h2>
+        <p id="bonus-question">Bonus question text will appear here</p>
+        <div id="bonus-answer-buttons"></div>
+    </div>
+
+    <div id="multiplayer-container" class="hide">
+        <h2>Multiplayer</h2>
+        <input type="text" id="multiplayer-room" placeholder="Enter or Create Room">
+        <button onclick="createRoom()">Create Room</button>
+        <button onclick="joinRoom()">Join Room</button>
+        <div id="multiplayer-chat">
+            <div id="chat-messages"></div>
+            <input type="text" id="chat-input" placeholder="Enter message">
+            <button onclick="sendMessage()">Send</button>
+            <label for="multiplayer-chat-toggle">Enable Chat Notifications</label>
+            <input type="checkbox" id="multiplayer-chat-toggle">
+            <p id="chat-notifications" class="hide">New message received!</p>
         </div>
     </div>
+
+    <div id="leaderboard-container">
+        <h2>Leaderboard</h2>
+        <ul id="leaderboard-list"></ul>
+    </div>
+
+    <div id="question-performance-container">
+        <h2>Question Performance</h2>
+        <ul id="question-performance-list"></ul>
+    </div>
+
+    <div id="settings-container">
+        <h2>Settings</h2>
+        <label for="randomize-questions">Randomize Questions</label>
+        <input type="checkbox" id="randomize-questions" onchange="toggleRandomizeQuestions()">
+        <label for="timer-toggle">Enable Timer</label>
+        <input type="checkbox" id="timer-toggle" onchange="toggleTimer()">
+        <label for="hint-toggle">Enable Hints</label>
+        <input type="checkbox" id="hint-toggle" onchange="toggleHints()">
+        <label for="adaptive-difficulty-toggle">Adaptive Difficulty</label>
+        <input type="checkbox" id="adaptive-difficulty-toggle" onchange="toggleAdaptiveDifficulty()">
+        <p id="adaptive-difficulty">Difficulty: Medium</p>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

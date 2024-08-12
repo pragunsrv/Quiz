@@ -1,200 +1,149 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-}
-
-.container {
+    color: #333;
     text-align: center;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.btn-container {
-    margin-top: 20px;
+h1, h2 {
+    color: #222;
 }
 
-.btn {
-    background-color: #4CAF50;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 5px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.btn:hover {
-    background-color: #45a049;
-}
-
+/* Hide class */
 .hide {
     display: none;
 }
 
-#error {
-    color: red;
-    font-weight: bold;
+/* Profile Container */
+#profile-container {
+    margin: 20px;
 }
 
-#profile-container, #difficulty-container, #timer-settings {
-    margin-top: 20px;
-}
-
-#hint {
-    color: #888;
-    margin-top: 10px;
-}
-
-#progress-bar {
-    width: 100%;
-    background-color: #ddd;
-    border-radius: 5px;
-    height: 20px;
-    margin-top: 20px;
-    position: relative;
-}
-
-#progress-fill {
-    height: 100%;
-    background-color: #4CAF50;
-    width: 0;
-    border-radius: 5px;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-#leaderboard-container {
-    margin-top: 20px;
-    text-align: center;
-}
-
-#leaderboard-list {
-    list-style: none;
-    padding: 0;
-}
-
-#leaderboard-list li {
-    background-color: #f4f4f4;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-#difficulty-filter {
-    margin-top: 10px;
-    padding: 5px;
-}
-
-#review-container {
-    margin-top: 20px;
-}
-
-#answer-review-list {
-    list-style: none;
-    padding: 0;
-}
-
-#answer-review-list li {
-    background-color: #f4f4f4;
-    margin: 5px 0;
-    padding: 10px;
-    border-radius: 5px;
-}
-/* Add the following to your existing styles.css */
-
-#category-select {
-    margin-top: 10px;
-    padding: 5px;
-}
-
-#performance-metrics {
-    margin-top: 20px;
-}
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f0f0f0;
-}
-
-.container {
-    text-align: center;
-}
-
-.hide {
-    display: none;
-}
-
-.btn {
-    background-color: #007bff;
-    border: none;
-    color: white;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 5px;
-}
-
-.btn:hover {
-    background-color: #0056b3;
-}
-
-.btn-container {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-#progress-bar {
-    width: 100%;
-    background-color: #e0e0e0;
-    height: 20px;
+#profile-select {
     margin: 10px 0;
 }
 
-#progress-fill {
-    height: 100%;
+/* Quiz Container */
+#quiz-container {
+    margin: 20px;
+}
+
+#question-container {
+    margin-bottom: 20px;
+}
+
+#answer-buttons {
+    margin-top: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
     background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Progress */
+#progress {
+    background-color: #ddd;
+    border-radius: 5px;
+    height: 20px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#progress-fill {
+    background-color: #28a745;
+    height: 100%;
     width: 0;
+    border-radius: 5px;
 }
 
-#timer {
-    font-size: 18px;
-    font-weight: bold;
+/* Timer */
+#timer-container {
+    margin-top: 10px;
 }
 
-#score-container,
-#review-container,
-#leaderboard-container,
-#achievements-container,
+/* Score Container */
+#score-container {
+    margin: 20px;
+}
+
+/* Bonus Round */
+#bonus-round {
+    margin: 20px;
+}
+
+#bonus-answer-buttons {
+    margin-top: 10px;
+}
+
+/* Multiplayer Container */
 #multiplayer-container {
-    margin-top: 20px;
+    margin: 20px;
 }
 
-#chat-container {
+#multiplayer-chat {
     margin-top: 20px;
 }
 
 #chat-messages {
     max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #ccc;
+    background-color: #eee;
     padding: 10px;
-    background-color: #fff;
+    border-radius: 5px;
+}
+
+#chat-input {
+    width: calc(100% - 90px);
+    padding: 10px;
+    border-radius: 5px;
+    margin-right: 10px;
+}
+
+#chat-notifications {
+    color: #007bff;
+    margin-top: 10px;
+}
+
+/* Leaderboard Container */
+#leaderboard-container {
+    margin: 20px;
+}
+
+#leaderboard-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+/* Question Performance Container */
+#question-performance-container {
+    margin: 20px;
+}
+
+#question-performance-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+/* Settings Container */
+#settings-container {
+    margin: 20px;
+}
+
+input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+p#adaptive-difficulty {
+    margin-top: 10px;
 }
