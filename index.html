@@ -9,7 +9,12 @@
 <body>
     <div class="container">
         <h1>Quiz Game</h1>
-        <div id="quiz-container">
+        <div id="profile-container">
+            <label for="username">Enter your name:</label>
+            <input type="text" id="username" placeholder="Your name">
+            <button id="start-button" class="btn" onclick="startGame()">Start Game</button>
+        </div>
+        <div id="quiz-container" class="hide">
             <p id="category"></p>
             <p id="question"></p>
             <div id="answer-buttons" class="btn-container">
@@ -22,6 +27,7 @@
         <div id="score-container" class="hide">
             <h2>Your Score: <span id="score">0</span></h2>
             <h2>High Score: <span id="high-score">0</span></h2>
+            <p>Username: <span id="profile-name">Guest</span></p>
         </div>
         <div id="difficulty-container">
             <label for="difficulty">Select Difficulty:</label>
@@ -29,6 +35,14 @@
                 <option value="easy">Easy</option>
                 <option value="medium">Medium</option>
                 <option value="hard">Hard</option>
+            </select>
+        </div>
+        <div id="timer-settings">
+            <label for="timer-length">Select Timer Length (seconds):</label>
+            <select id="timer-length">
+                <option value="30">30</option>
+                <option value="45">45</option>
+                <option value="60">60</option>
             </select>
         </div>
     </div>

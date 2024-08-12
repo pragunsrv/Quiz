@@ -1,3 +1,6 @@
+const profileContainer = document.getElementById('profile-container');
+const usernameInput = document.getElementById('username');
+const startButton = document.getElementById('start-button');
 const questionContainer = document.getElementById('quiz-container');
 const answerButtons = document.getElementById('answer-buttons');
 const nextButton = document.getElementById('next-button');
@@ -10,6 +13,8 @@ const progressElement = document.getElementById('progress');
 const currentQuestionElement = document.getElementById('current-question');
 const totalQuestionsElement = document.getElementById('total-questions');
 const difficultySelect = document.getElementById('difficulty');
+const timerLengthSelect = document.getElementById('timer-length');
+const profileNameElement = document.getElementById('profile-name');
 
 const questions = {
     easy: [
@@ -81,25 +86,28 @@ const questions = {
 let currentQuestionIndex = 0;
 let score = 0;
 let timer;
-let timeLeft = 30;
+let timeLeft;
 let highScore = localStorage.getItem('highScore') || 0;
+let username = 'Guest';
 
 function startGame() {
+    username = usernameInput.value || 'Guest';
+    profileNameElement.innerText = username;
+
     currentQuestionIndex = 0;
     score = 0;
     scoreElement.innerText = score;
     highScoreElement.innerText = highScore;
-    totalQuestionsElement.innerText = getQuestions().length;
-    nextButton.classList.add('hide');
-    scoreContainer.classList.add('hide');
-    questionContainer.classList.remove('hide');
-    showQuestion(getQuestions()[currentQuestionIndex]);
-}
 
-function getQuestions() {
     const difficulty = difficultySelect.value;
     const questionsArray = questions[difficulty];
-    return shuffleArray(questionsArray);
+    totalQuestionsElement.innerText = questionsArray.length;
+
+    nextButton.classList.add('hide');
+    scoreContainer.classList.add('hide');
+    profileContainer.classList.add('hide');
+    questionContainer.classList.remove('hide');
+    showQuestion(shuffleArray(questionsArray)[currentQuestionIndex]);
 }
 
 function showQuestion(question) {
@@ -132,8 +140,10 @@ function selectAnswer(answer) {
 
 function nextQuestion() {
     currentQuestionIndex++;
-    if (currentQuestionIndex < getQuestions().length) {
-        showQuestion(getQuestions()[currentQuestionIndex]);
+    const difficulty = difficultySelect.value;
+    const questionsArray = questions[difficulty];
+    if (currentQuestionIndex < questionsArray.length) {
+        showQuestion(questionsArray[currentQuestionIndex]);
         nextButton.classList.add('hide');
     } else {
         if (score > highScore) {
@@ -148,7 +158,7 @@ function nextQuestion() {
 }
 
 function startTimer() {
-    timeLeft = 30;
+    timeLeft = parseInt(timerLengthSelect.value, 10);
     timerCount.innerText = timeLeft;
     timer = setInterval(() => {
         timeLeft--;
@@ -167,5 +177,3 @@ function shuffleArray(array) {
     }
     return array;
 }
-
-startGame();

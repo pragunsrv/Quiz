@@ -47,6 +47,6 @@ body {
     font-weight: bold;
 }
 
-#difficulty-container {
+#profile-container, #difficulty-container, #timer-settings {
     margin-top: 20px;
 }
